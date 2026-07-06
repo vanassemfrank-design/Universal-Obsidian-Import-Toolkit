@@ -1,0 +1,29 @@
+[project]
+name = "unobit"
+version = "0.1.0"
+description = "Universal Obsidian Import Toolkit"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+  { name = "Frank van Assem" }
+]
+license = { text = "MIT" }
+
+dependencies = [
+  "beautifulsoup4",
+  "lxml",
+  "markdownify",
+  "PyYAML",
+  "python-slugify",
+  "rich",
+  "typer"
+]
+
+[project.scripts]
+unobit = "unobit.main:app"
+
+[tool.ruff]
+line-length = 100
+
+[tool.black]
+line-length = 100

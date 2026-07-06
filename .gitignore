@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Logs
+logs/
+*.log
+
+# Local config
+config/config.yaml
+
+# Sample/private imports
+samples/**/*.enex
+samples/**/*.zip
+samples/**/*.pdf
+samples/**/*.docx
+
+# Obsidian/test vault output
+output/
+vault_test/
