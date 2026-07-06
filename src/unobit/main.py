@@ -1,3 +1,5 @@
+from pathlib import Path
+from unobit.importers import DummyImporter
 import typer
 from rich import print
 
@@ -44,6 +46,24 @@ def demo():
     print(note)
     print()
     print(bookmark)
+
+@app.command()
+def import_dummy(path: str = "samples/dummy/example.dummy"):
+    importer = DummyImporter()
+    import_path = Path(path)
+
+    if not importer.supports_file(import_path):
+        print(f"[red]Unsupported file:[/red] {import_path}")
+        raise typer.Exit(code=1)
+
+    items = importer.import_file(import_path)
+
+    print(f"[bold]Imported {len(items)} items from {import_path}[/bold]")
+    print()
+
+    for item in items:
+        print(item)
+        print()
 
 
 if __name__ == "__main__":
