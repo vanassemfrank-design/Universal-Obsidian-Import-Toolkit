@@ -1,3 +1,4 @@
+from unobit.exporters import MarkdownExporter
 from pathlib import Path
 from unobit.importers import DummyImporter
 import typer
@@ -64,6 +65,33 @@ def import_dummy(path: str = "samples/dummy/example.dummy"):
     for item in items:
         print(item)
         print()
+
+@app.command()
+def export_demo(output: str = "output/demo"):
+    note = Note(
+        title="Example Evernote Note",
+        source="evernote",
+        notebook="Inbox",
+        body="This is a universal note object exported to Markdown.",
+        tags=["example", "evernote"],
+    )
+
+    bookmark = Bookmark(
+        title="Obsidian",
+        source="chrome",
+        url="https://obsidian.md",
+        folder="PKM/Tools",
+        tags=["pkm", "tool"],
+    )
+
+    exporter = MarkdownExporter()
+    created_files = exporter.export_items([note, bookmark], Path(output))
+
+    print(f"[bold]Exported {len(created_files)} files to {output}[/bold]")
+    print()
+
+    for file_path in created_files:
+        print(file_path)
 
 
 if __name__ == "__main__":
