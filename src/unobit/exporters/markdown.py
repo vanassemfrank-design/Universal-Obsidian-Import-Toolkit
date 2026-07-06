@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from unobit.utils.dates import format_datetime
 from slugify import slugify
 
 from unobit.exporters.base import BaseExporter
@@ -41,13 +41,31 @@ class MarkdownExporter(BaseExporter):
     def _frontmatter(self, item: KnowledgeItem) -> str:
         tags = "\n".join(f"  - {tag}" for tag in item.tags)
 
-        return (
-            "---\n"
-            f"title: \"{item.title}\"\n"
-            f"type: \"{item.item_type()}\"\n"
-            f"source: \"{item.source}\"\n"
-            f"id: \"{item.id}\"\n"
-            "tags:\n"
-            f"{tags if tags else '  []'}\n"
-            "---"
-        )
+        lines = [
+            "---",
+            f'title: "{item.title}"',
+            f'type: "{item.item_type()}"',
+            f'source: "{item.source}"',
+            f'id: "{item.id}"',
+        ]
+
+        created = format_datetime(item.created_at)
+        updated = format_datetime(item.updated_at)
+
+        if created:
+            lines.append(f'created: "{created}"')
+
+        if updated:
+            lines.append(f'updated: "{updated}"')
+
+        if item.metadata:
+            lines.append("metadata:")
+            for key, value in item.metadata.items():
+                safe_value = str(value).replace('"', '\\"')
+                lines.append(f'  {key}: "{safe_value}"')
+
+        lines.append("tags:")
+        lines.append(tags if tags else "  []")
+        lines.append("---")
+
+        return "\n".join(lines)
