@@ -1,6 +1,6 @@
+from unobit.importers import DummyImporter, EvernoteImporter
 from unobit.exporters import MarkdownExporter
 from pathlib import Path
-from unobit.importers import DummyImporter
 import typer
 from rich import print
 
@@ -93,6 +93,23 @@ def export_demo(output: str = "output/demo"):
     for file_path in created_files:
         print(file_path)
 
+@app.command()
+def import_evernote(path: str, output: str = "output/evernote"):
+    import_path = Path(path)
+
+    importer = EvernoteImporter()
+
+    if not importer.supports_file(import_path):
+        print(f"[red]Unsupported file:[/red] {import_path}")
+        raise typer.Exit(code=1)
+
+    items = importer.import_file(import_path)
+
+    exporter = MarkdownExporter()
+    created_files = exporter.export_items(items, Path(output))
+
+    print(f"[bold]Imported {len(items)} Evernote notes[/bold]")
+    print(f"[bold]Exported {len(created_files)} Markdown files to {output}[/bold]")
 
 if __name__ == "__main__":
     app()
