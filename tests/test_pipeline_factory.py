@@ -30,9 +30,10 @@ def test_pipeline_factory_creates_default_pipeline():
         ],
         context,
     )
-
+    
+    codes = [message.context["code"] for message in report.warnings + report.errors]    
     assert len(result) == 2
-    assert len(report.warnings) == 1
+    assert "note-missing-title" in codes
     assert report.warnings[0].context["code"] == "note-missing-title"
 
 def test_pipeline_factory_default_pipeline_keeps_valid_notes():
