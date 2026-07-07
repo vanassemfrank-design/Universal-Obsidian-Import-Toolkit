@@ -122,6 +122,7 @@ class EvernoteImporter(BaseImporter):
                     checksum=checksum,
                     size_bytes=size_bytes,
                     source_url=source_url,
+                    data=raw_bytes if raw_bytes else None,
                 )
             )
 
