@@ -34,3 +34,24 @@ def test_pipeline_factory_creates_default_pipeline():
     assert len(result) == 2
     assert len(report.warnings) == 1
     assert report.warnings[0].context["code"] == "note-missing-title"
+
+def test_pipeline_factory_default_pipeline_keeps_valid_notes():
+    report = ImportReport(source="test.enex", importer="evernote")
+
+    context = PipelineContext(
+        source_path=Path("test.enex"),
+        output_path=Path("output"),
+        importer_name="evernote",
+        report=report,
+    )
+
+    pipeline = PipelineFactory.create_default()
+
+    notes = [
+        FakeNote(title="Valid", content="Content"),
+    ]
+
+    result = pipeline.run(notes, context)
+
+    assert result == notes
+    assert report.errors == []
