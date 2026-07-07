@@ -42,3 +42,8 @@ class ImportReport:
         self.errors.append(
             ImportMessage(level="error", message=message, context=context)
         )
+
+    timings: dict[str, float] = field(default_factory=dict)
+
+    def add_timing(self, name: str, seconds: float) -> None:
+        self.timings[name] = self.timings.get(name, 0.0) + seconds
