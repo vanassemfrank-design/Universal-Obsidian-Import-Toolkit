@@ -1,0 +1,10 @@
+Ik stel voor dat we aan het einde van elke ontwikkelsessie standaard vier bestanden nalopen en indien nodig bijwerken:
+
+CHANGELOG.md – Wat is functioneel veranderd?
+ROADMAP.md – Welke sprintstatus is gewijzigd?
+docs/project-state.md – Actuele technische status van het project.
+docs/session-handover.md – Korte overdracht naar de volgende ontwikkelsessie.
+
+Met die vier documenten kun je in een nieuwe ChatGPT-sessie eenvoudig zeggen:
+
+"Lees README, ROADMAP, de ADR's, project-state.md en session-handover.md en ga verder."

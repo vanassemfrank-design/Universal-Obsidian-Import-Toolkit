@@ -19,6 +19,12 @@ dependencies = [
   "typer"
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+]
+
 [project.scripts]
 unobit = "unobit.main:app"
 
