@@ -11,3 +11,4 @@ class Attachment:
     size_bytes: int | None = None
     source_ref: str | None = None
     source_url: str | None = None
+    data: bytes | None = None

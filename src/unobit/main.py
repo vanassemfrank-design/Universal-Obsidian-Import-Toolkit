@@ -1,6 +1,7 @@
+from pathlib import Path
 from unobit.importers import DummyImporter, EvernoteImporter
 from unobit.exporters import MarkdownExporter
-from pathlib import Path
+
 import typer
 from rich import print
 
@@ -113,3 +114,26 @@ def import_evernote(path: str, output: str = "output/evernote"):
 
 if __name__ == "__main__":
     app()
+
+@app.command()
+def debug_evernote(path: str):
+    import_path = Path(path)
+    importer = EvernoteImporter()
+
+    items = importer.import_file(import_path)
+
+    print(f"[bold]Debug Evernote import[/bold]")
+    print(f"File: {import_path}")
+    print(f"Items: {len(items)}")
+    print()
+
+    for item in items:
+        attachment_count = len(getattr(item, "attachments", []))
+        print(f"- {item.title}")
+        print(f"  attachments: {attachment_count}")
+
+        for attachment in getattr(item, "attachments", []):
+            print(f"    - filename: {attachment.filename}")
+            print(f"      mime: {attachment.mime_type}")
+            print(f"      checksum: {attachment.checksum}")
+            print(f"      size: {attachment.size_bytes}")
