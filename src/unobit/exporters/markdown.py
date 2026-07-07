@@ -1,9 +1,10 @@
 from pathlib import Path
-from unobit.utils.dates import format_datetime
+
 from slugify import slugify
 
 from unobit.exporters.base import BaseExporter
 from unobit.models import Bookmark, KnowledgeItem, Note
+from unobit.utils.dates import format_datetime
 
 
 class MarkdownExporter(BaseExporter):
@@ -30,14 +31,36 @@ class MarkdownExporter(BaseExporter):
         frontmatter = self._frontmatter(item)
 
         if isinstance(item, Note):
-            return f"{frontmatter}\n\n{item.body}\n"
+            attachment_block = self._attachment_block(item)
+            return f"{frontmatter}\n\n{item.body}\n{attachment_block}\n"
 
         if isinstance(item, Bookmark):
             description = item.description or ""
             return f"{frontmatter}\n\n[{item.title}]({item.url})\n\n{description}\n"
 
         return f"{frontmatter}\n\n"
-    
+
+    def _attachment_block(self, item: Note) -> str:
+        if not item.attachments:
+            return ""
+
+        lines = [
+            "",
+            "## Attachments",
+            "",
+        ]
+
+        for attachment in item.attachments:
+            lines.append(f"- {attachment.filename}")
+
+            if attachment.mime_type:
+                lines.append(f"  - type: `{attachment.mime_type}`")
+
+            if attachment.checksum:
+                lines.append(f"  - checksum: `{attachment.checksum}`")
+
+        return "\n".join(lines)
+
     def _frontmatter(self, item: KnowledgeItem) -> str:
         tags = "\n".join(f"  - {tag}" for tag in item.tags)
 

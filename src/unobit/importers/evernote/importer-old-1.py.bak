@@ -1,6 +1,5 @@
-import base64
-import hashlib
-import mimetypes
+from unobit.models import Attachment, KnowledgeItem, Note
+from unobit.utils.dates import parse_evernote_datetime
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
@@ -8,8 +7,6 @@ from bs4 import BeautifulSoup
 from markdownify import markdownify as md
 
 from unobit.importers.base import BaseImporter
-from unobit.models import Attachment, KnowledgeItem, Note
-from unobit.utils.dates import parse_evernote_datetime
 
 
 class EvernoteImporter(BaseImporter):
@@ -27,13 +24,11 @@ class EvernoteImporter(BaseImporter):
         for note_element in root.findall("note"):
             title = self._text(note_element, "title") or "Untitled"
             content = self._text(note_element, "content") or ""
-
             created_raw = self._text(note_element, "created")
             updated_raw = self._text(note_element, "updated")
 
             created = parse_evernote_datetime(created_raw)
             updated = parse_evernote_datetime(updated_raw)
-
             tags = [tag.text for tag in note_element.findall("tag") if tag.text]
 
             body = self._convert_enml_to_markdown(content)
@@ -52,9 +47,8 @@ class EvernoteImporter(BaseImporter):
                     "updated_raw": updated_raw,
                     "source_file": str(path),
                     "source_filename": path.name,
-                    "attachment_count": len(attachments),
-                },
-            )
+                    },
+                )
 
             notes.append(note)
 
@@ -76,53 +70,36 @@ class EvernoteImporter(BaseImporter):
             html = content
 
         return md(html)
-
     def _extract_attachments(self, note_element: ET.Element) -> list[Attachment]:
-        attachments: list[Attachment] = []
+    attachments: list[Attachment] = []
 
-        for index, resource in enumerate(note_element.findall("resource"), start=1):
-            mime_type = self._text(resource, "mime")
-            data = resource.find("data")
+    for resource in note_element.findall("resource"):
+        mime_type = self._text(resource, "mime")
+        data = resource.find("data")
+        recognition = resource.find("recognition")
 
-            filename = None
-            source_url = None
+        filename = None
 
-            attributes = resource.find("resource-attributes")
-            if attributes is not None:
-                filename = self._text(attributes, "file-name")
-                source_url = self._text(attributes, "source-url")
+        attributes = resource.find("resource-attributes")
+        if attributes is not None:
+            filename = self._text(attributes, "file-name")
 
-            raw_bytes = b""
-            checksum = None
-            size_bytes = None
+        if not filename:
+            filename = "evernote-attachment"
 
-            if data is not None and data.text:
-                clean_data = "".join(data.text.split())
-                raw_bytes = base64.b64decode(clean_data)
-                checksum = hashlib.md5(raw_bytes).hexdigest()
-                size_bytes = len(raw_bytes)
+        checksum = data.attrib.get("hash") if data is not None else None
 
-            if not filename:
-                extension = mimetypes.guess_extension(mime_type or "") or ".bin"
+        source_ref = None
+        if recognition is not None:
+            source_ref = "recognition"
 
-                if mime_type and mime_type.startswith("image/"):
-                    prefix = "evernote-image"
-                elif mime_type == "application/pdf":
-                    prefix = "evernote-pdf"
-                else:
-                    prefix = "evernote-attachment"
-
-                short_hash = checksum[:8] if checksum else f"{index:04d}"
-                filename = f"{prefix}-{short_hash}{extension}"
-
-            attachments.append(
-                Attachment(
-                    filename=filename,
-                    mime_type=mime_type,
-                    checksum=checksum,
-                    size_bytes=size_bytes,
-                    source_url=source_url,
-                )
+        attachments.append(
+            Attachment(
+                filename=filename,
+                mime_type=mime_type,
+                checksum=checksum,
+                source_ref=source_ref,
             )
+        )
 
-        return attachments
+    return attachments

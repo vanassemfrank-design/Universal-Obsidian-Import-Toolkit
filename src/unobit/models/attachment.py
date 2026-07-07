@@ -8,3 +8,6 @@ class Attachment:
     path: Path | None = None
     mime_type: str | None = None
     checksum: str | None = None
+    size_bytes: int | None = None
+    source_ref: str | None = None
+    source_url: str | None = None
