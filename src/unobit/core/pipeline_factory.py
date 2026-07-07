@@ -1,6 +1,7 @@
 from unobit.core.pipeline import ProcessingPipeline
 from unobit.core.processing_step import ProcessingStep
 from unobit.core.validation_step import ValidationStep
+from unobit.processors.content_cleanup_processor import ContentCleanupProcessor
 from unobit.processors.title_cleanup_processor import TitleCleanupProcessor
 from unobit.validators.note_validator import NoteValidator
 
@@ -18,6 +19,7 @@ class PipelineFactory:
                 ProcessingStep(
                     processors=[
                         TitleCleanupProcessor(),
+                        ContentCleanupProcessor(),
                     ]
                 ),
             ]

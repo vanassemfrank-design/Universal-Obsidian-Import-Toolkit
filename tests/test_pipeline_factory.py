@@ -75,3 +75,23 @@ def test_pipeline_factory_default_pipeline_cleans_title():
     result = pipeline.run(notes, context)
 
     assert result[0].title == "Mijn notitie"
+
+def test_pipeline_factory_default_pipeline_cleans_content():
+    report = ImportReport(source="test.enex", importer="evernote")
+
+    context = PipelineContext(
+        source_path=Path("test.enex"),
+        output_path=Path("output"),
+        importer_name="evernote",
+        report=report,
+    )
+
+    pipeline = PipelineFactory.create_default()
+
+    notes = [
+        FakeNote(title="Title", content="\n\nContent\n\n"),
+    ]
+
+    result = pipeline.run(notes, context)
+
+    assert result[0].content == "Content"
