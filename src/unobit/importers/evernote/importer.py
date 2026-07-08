@@ -4,12 +4,10 @@ import mimetypes
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
-from bs4 import BeautifulSoup
-from markdownify import markdownify as md
-
 from unobit.importers.base import BaseImporter
 from unobit.models import Attachment, KnowledgeItem, Note
 from unobit.utils.dates import parse_evernote_datetime
+from unobit.enml.converter import ENMLConverter
 
 
 class EvernoteImporter(BaseImporter):
@@ -23,6 +21,7 @@ class EvernoteImporter(BaseImporter):
         root = tree.getroot()
 
         notes: list[KnowledgeItem] = []
+        converter = ENMLConverter()
 
         for note_element in root.findall("note"):
             guid = self._text(note_element, "guid")
@@ -37,7 +36,7 @@ class EvernoteImporter(BaseImporter):
 
             tags = [tag.text for tag in note_element.findall("tag") if tag.text]
 
-            body = self._convert_enml_to_markdown(content)
+            body = converter.convert(content)
             attachments = self._extract_attachments(note_element)
 
             note = Note(
@@ -67,17 +66,6 @@ class EvernoteImporter(BaseImporter):
         if found is None:
             return None
         return found.text
-
-    def _convert_enml_to_markdown(self, content: str) -> str:
-        soup = BeautifulSoup(content, features="xml")
-
-        en_note = soup.find("en-note")
-        if en_note:
-            html = str(en_note)
-        else:
-            html = content
-
-        return md(html)
 
     def _extract_attachments(self, note_element: ET.Element) -> list[Attachment]:
         attachments: list[Attachment] = []
