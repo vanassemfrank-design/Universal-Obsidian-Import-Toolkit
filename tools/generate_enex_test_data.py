@@ -135,7 +135,53 @@ def main() -> None:
     generate_internal_links()
     generate_large_title()
     generate_invalid_internal_link()
+    generate_enml_formatting()
 
+def generate_enml_formatting() -> None:
+    body = """
+<div>First paragraph</div>
+<div>Second paragraph with <b>bold</b> and <i>italic</i>.</div>
+<br/>
+<div><en-todo/> Open task</div>
+<div><en-todo checked="true"/> Done task</div>
+<hr/>
+<ul>
+  <li>Bullet one</li>
+  <li>Bullet two</li>
+</ul>
+<ol>
+  <li>Number one</li>
+  <li>Number two</li>
+</ol>
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Status</th>
+  </tr>
+  <tr>
+    <td>Import</td>
+    <td>Done</td>
+  </tr>
+  <tr>
+    <td>Export</td>
+    <td>Planned</td>
+  </tr>
+</table>
+"""
+
+    content = enex(
+        [
+            note(
+                guid="55555555-5555-5555-5555-555555555555",
+                title="ENML Formatting",
+                body=body,
+                tags=["test", "enml", "formatting"],
+            )
+        ]
+    )
+
+    write_file("enml-formatting.enex", content)
 
 if __name__ == "__main__":
     main()
+
