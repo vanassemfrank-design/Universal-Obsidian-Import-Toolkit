@@ -7,7 +7,10 @@ from unobit.processors.title_cleanup_processor import TitleCleanupProcessor
 from unobit.validators.attachment_validator import AttachmentValidator
 from unobit.validators.metadata_validator import MetadataValidator
 from unobit.validators.note_validator import NoteValidator
-
+from unobit.core.batch_processing_step import BatchProcessingStep
+from unobit.processors.evernote_internal_link_processor import EvernoteInternalLinkProcessor
+from unobit.core.resolution_step import ResolutionStep
+from unobit.resolvers.evernote_links import EvernoteInternalLinkResolver
 
 class PipelineFactory:
     @staticmethod
@@ -30,6 +33,22 @@ class PipelineFactory:
                         processors=[
                             TitleCleanupProcessor(),
                             ContentCleanupProcessor(),
+                        ]
+                    ),
+                ),
+                TimedStep(
+                    "resolution",
+                    ResolutionStep(
+                        resolvers=[
+                            EvernoteInternalLinkResolver(),
+                        ]
+                    ),
+                ),
+                TimedStep(
+                    "evernote-links",
+                    BatchProcessingStep(
+                        processors=[
+                            EvernoteInternalLinkProcessor(),
                         ]
                     ),
                 ),

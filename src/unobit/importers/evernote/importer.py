@@ -25,6 +25,7 @@ class EvernoteImporter(BaseImporter):
         notes: list[KnowledgeItem] = []
 
         for note_element in root.findall("note"):
+            guid = self._text(note_element, "guid")
             title = self._text(note_element, "title") or "Untitled"
             content = self._text(note_element, "content") or ""
 
@@ -48,6 +49,7 @@ class EvernoteImporter(BaseImporter):
                 updated_at=updated,
                 attachments=attachments,
                 metadata={
+                    "guid": guid,
                     "created_raw": created_raw,
                     "updated_raw": updated_raw,
                     "source_file": str(path),
@@ -67,7 +69,7 @@ class EvernoteImporter(BaseImporter):
         return found.text
 
     def _convert_enml_to_markdown(self, content: str) -> str:
-        soup = BeautifulSoup(content, "lxml")
+        soup = BeautifulSoup(content, features="xml")
 
         en_note = soup.find("en-note")
         if en_note:

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE en-export SYSTEM "http://xml.evernote.com/pub/evernote-export4.dtd">
+<en-export export-date="20260708T090000Z" application="UNOBIT Test Generator" version="1.0">
+<note>
+  <guid>44444444-4444-4444-4444-444444444444</guid>
+  <title>Broken Link Source</title>
+  <content><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">
+<en-note>
+<div>See <a href="evernote:///view/12345/s1/99999999-9999-9999-9999-999999999999/99999999-9999-9999-9999-999999999999/">Missing Note</a></div>
+<div>This link should remain unresolved.</div>
+</en-note>]]></content>
+  <created>20260708T090000Z</created>
+  <updated>20260708T090000Z</updated>
+  <tag>test</tag>
+  <tag>broken-links</tag>
+</note>
+
+</en-export>
