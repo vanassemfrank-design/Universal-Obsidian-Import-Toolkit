@@ -99,7 +99,14 @@ class MarkdownExporter(BaseExporter):
 
     def _safe_filename(self, item: KnowledgeItem) -> str:
         base = slugify(item.title) or item.id
-        return f"{base}.md"
+
+        short_id = str(item.id)[:8]
+        max_base_length = 100
+
+        if len(base) > max_base_length:
+            base = base[:max_base_length].rstrip("-")
+
+        return f"{base}-{short_id}.md"
 
     def _to_markdown(self, item: KnowledgeItem) -> str:
         frontmatter = self._frontmatter(item)
