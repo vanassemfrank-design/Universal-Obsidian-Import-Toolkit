@@ -1,18 +1,17 @@
-from bs4 import BeautifulSoup
 from markdownify import markdownify as md
+
+from unobit.enml.cleanup import extract_en_note_html, parse_enml
+from unobit.enml.postprocess import clean_markdown
+from unobit.enml.todos import convert_todos
 
 
 class ENMLConverter:
     def convert(self, content: str) -> str:
-        soup = BeautifulSoup(content, features="xml")
+        soup = parse_enml(content)
 
-        for todo in soup.find_all("en-todo"):
-            checked = todo.get("checked") == "true"
-            replacement = "- [x] " if checked else "- [ ] "
-            todo.replace_with(replacement)
+        convert_todos(soup)
 
-        en_note = soup.find("en-note")
-        html = str(en_note) if en_note else content
+        html = extract_en_note_html(soup, fallback=content)
 
         markdown = md(
             html,
@@ -20,10 +19,4 @@ class ENMLConverter:
             bullets="-",
         )
 
-        markdown = markdown.replace("<en-note>", "")
-        markdown = markdown.replace("</en-note>", "")
-
-        lines = [line.rstrip() for line in markdown.splitlines()]
-        cleaned = "\n".join(lines).strip()
-
-        return cleaned
+        return clean_markdown(markdown)
