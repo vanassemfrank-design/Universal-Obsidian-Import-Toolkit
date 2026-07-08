@@ -1,5 +1,7 @@
 from pathlib import Path
 from xml.sax.saxutils import escape
+import base64
+import hashlib
 
 
 OUTPUT_DIR = Path("tests/data/evernote")
@@ -10,6 +12,86 @@ def enml(body: str) -> str:
 <!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">
 <en-note>{body}</en-note>]]>"""
 
+def resource(
+    data: bytes,
+    mime_type: str,
+    filename: str,
+) -> tuple[str, str]:
+    checksum = hashlib.md5(data).hexdigest()
+    encoded = base64.b64encode(data).decode("ascii")
+
+    xml = f"""  <resource>
+    <data encoding="base64">{encoded}</data>
+    <mime>{mime_type}</mime>
+    <resource-attributes>
+      <file-name>{escape(filename)}</file-name>
+    </resource-attributes>
+  </resource>
+"""
+
+    return xml, checksum
+
+def note_with_resources(
+    guid: str,
+    title: str,
+    body: str,
+    resources: list[str],
+    created: str = "20260708T090000Z",
+    updated: str = "20260708T090000Z",
+    tags: list[str] | None = None,
+) -> str:
+    tags_xml = ""
+
+    for tag in tags or []:
+        tags_xml += f"  <tag>{escape(tag)}</tag>\n"
+
+    resources_xml = "\n".join(resources)
+
+    return f"""<note>
+  <guid>{escape(guid)}</guid>
+  <title>{escape(title)}</title>
+  <content>{enml(body)}</content>
+  <created>{created}</created>
+  <updated>{updated}</updated>
+{tags_xml}{resources_xml}</note>
+"""
+
+def generate_enml_media_with_attachment() -> None:
+    image_data = b"fake image content"
+    pdf_data = b"%PDF-1.4 fake pdf content"
+
+    image_resource, image_checksum = resource(
+        data=image_data,
+        mime_type="image/png",
+        filename="test-image.png",
+    )
+
+    pdf_resource, pdf_checksum = resource(
+        data=pdf_data,
+        mime_type="application/pdf",
+        filename="test-document.pdf",
+    )
+
+    body = f"""
+<div>Image below:</div>
+<div><en-media type="image/png" hash="{image_checksum}"/></div>
+<div>PDF below:</div>
+<div><en-media type="application/pdf" hash="{pdf_checksum}"/></div>
+"""
+
+    content = enex(
+        [
+            note_with_resources(
+                guid="77777777-7777-7777-7777-777777777777",
+                title="ENML Media With Attachment",
+                body=body,
+                resources=[image_resource, pdf_resource],
+                tags=["test", "enml", "media", "attachments"],
+            )
+        ]
+    )
+
+    write_file("enml-media-with-attachment.enex", content)
 
 def note(
     guid: str,
@@ -137,6 +219,7 @@ def main() -> None:
     generate_invalid_internal_link()
     generate_enml_formatting()
     generate_media_placeholder()
+    generate_enml_media_with_attachment()
 
 def generate_enml_formatting() -> None:
     body = """

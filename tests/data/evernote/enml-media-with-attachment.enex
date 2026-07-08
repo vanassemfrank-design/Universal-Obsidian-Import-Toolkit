@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE en-export SYSTEM "http://xml.evernote.com/pub/evernote-export4.dtd">
+<en-export export-date="20260708T090000Z" application="UNOBIT Test Generator" version="1.0">
+<note>
+  <guid>77777777-7777-7777-7777-777777777777</guid>
+  <title>ENML Media With Attachment</title>
+  <content><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">
+<en-note>
+<div>Image below:</div>
+<div><en-media type="image/png" hash="50e7825d3a7f7ef39c0d330a69e9ac35"/></div>
+<div>PDF below:</div>
+<div><en-media type="application/pdf" hash="3ccac8e71027b96bce700ca3451d87fa"/></div>
+</en-note>]]></content>
+  <created>20260708T090000Z</created>
+  <updated>20260708T090000Z</updated>
+  <tag>test</tag>
+  <tag>enml</tag>
+  <tag>media</tag>
+  <tag>attachments</tag>
+  <resource>
+    <data encoding="base64">ZmFrZSBpbWFnZSBjb250ZW50</data>
+    <mime>image/png</mime>
+    <resource-attributes>
+      <file-name>test-image.png</file-name>
+    </resource-attributes>
+  </resource>
+
+  <resource>
+    <data encoding="base64">JVBERi0xLjQgZmFrZSBwZGYgY29udGVudA==</data>
+    <mime>application/pdf</mime>
+    <resource-attributes>
+      <file-name>test-document.pdf</file-name>
+    </resource-attributes>
+  </resource>
+</note>
+
+</en-export>

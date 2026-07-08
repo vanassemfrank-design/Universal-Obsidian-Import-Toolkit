@@ -25,6 +25,10 @@ class ImportReport:
     attachments_exported: int = 0
     attachments_failed: int = 0
 
+    media_total: int = 0
+    media_resolved: int = 0
+    media_unresolved: int = 0
+
     warnings: list[ImportMessage] = field(default_factory=list)
     errors: list[ImportMessage] = field(default_factory=list)
 

@@ -11,6 +11,7 @@ from unobit.core.batch_processing_step import BatchProcessingStep
 from unobit.processors.evernote_internal_link_processor import EvernoteInternalLinkProcessor
 from unobit.core.resolution_step import ResolutionStep
 from unobit.resolvers.evernote_links import EvernoteInternalLinkResolver
+from unobit.resolvers.media_links import MediaLinkResolver
 
 class PipelineFactory:
     @staticmethod
@@ -41,6 +42,7 @@ class PipelineFactory:
                     ResolutionStep(
                         resolvers=[
                             EvernoteInternalLinkResolver(),
+                            MediaLinkResolver(),
                         ]
                     ),
                 ),

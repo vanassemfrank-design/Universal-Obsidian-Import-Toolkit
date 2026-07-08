@@ -156,6 +156,11 @@ def import_evernote(path: str, output: str = "output/evernote"):
     print(f"  Exported   : {report.attachments_exported}")
     print(f"  Failed     : {report.attachments_failed}")
     print()
+    print("Media")
+    print(f"  Total      : {report.media_total}")
+    print(f"  Resolved   : {report.media_resolved}")
+    print(f"  Unresolved : {report.media_unresolved}")
+    print()
     print(f"Warnings     : {len(report.warnings)}")
     print(f"Errors       : {len(report.errors)}")
 
