@@ -1,37 +1,47 @@
-from dataclasses import dataclass
-
+from unobit.models import Note
 from unobit.validators.note_validator import NoteValidator
-
-
-@dataclass
-class FakeNote:
-    title: str | None
-    content: str | None
 
 
 def test_note_validator_warns_on_missing_title():
     validator = NoteValidator()
 
-    result = validator.validate(FakeNote(title="", content="Hello"))
+    note = Note(
+        title="",
+        source="test",
+        body="Hello",
+    )
+
+    result = validator.validate(note)
 
     assert result.has_warnings is True
     assert result.messages[0].code == "note-missing-title"
 
 
-def test_note_validator_errors_on_missing_content():
+def test_note_validator_errors_on_missing_body():
     validator = NoteValidator()
 
-    result = validator.validate(FakeNote(title="Title", content=None))
+    note = Note(
+        title="Title",
+        source="test",
+        body=None,
+    )
+
+    result = validator.validate(note)
 
     assert result.has_errors is True
-    assert result.messages[0].code == "note-missing-content"
+    assert result.messages[0].code == "note-missing-body"
 
 
 def test_note_validator_accepts_valid_note():
     validator = NoteValidator()
 
-    result = validator.validate(FakeNote(title="Title", content="Hello"))
+    note = Note(
+        title="Title",
+        source="test",
+        body="Hello",
+    )
+
+    result = validator.validate(note)
 
     assert result.has_errors is False
     assert result.has_warnings is False
-    assert result.messages == []

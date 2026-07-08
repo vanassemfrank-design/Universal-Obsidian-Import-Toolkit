@@ -1,8 +1,8 @@
 class ContentCleanupProcessor:
     def process(self, item: object) -> object:
-        content = getattr(item, "content", None)
+        body = getattr(item, "body", None)
 
-        if isinstance(content, str):
-            item.content = content.strip()
+        if isinstance(body, str):
+            item.body = body.strip()
 
         return item

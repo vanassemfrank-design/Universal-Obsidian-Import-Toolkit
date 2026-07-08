@@ -1,3 +1,5 @@
+import mimetypes
+import re
 from pathlib import Path
 
 from slugify import slugify
@@ -34,13 +36,66 @@ class MarkdownExporter(BaseExporter):
         attachments_path = output_path / "Attachments"
         attachments_path.mkdir(parents=True, exist_ok=True)
 
-        for attachment in item.attachments:
+        used_filenames: set[str] = set()
+
+        for index, attachment in enumerate(item.attachments, start=1):
             if not attachment.data:
                 continue
 
-            target_path = attachments_path / attachment.filename
+            safe_filename = self._safe_attachment_filename(
+                filename=attachment.filename,
+                mime_type=attachment.mime_type,
+                checksum=attachment.checksum,
+                index=index,
+                used_filenames=used_filenames,
+            )
+
+            target_path = attachments_path / safe_filename
             target_path.write_bytes(attachment.data)
+
+            attachment.filename = safe_filename
             attachment.path = target_path
+
+    def _safe_attachment_filename(
+        self,
+        filename: str | None,
+        mime_type: str | None,
+        checksum: str | None,
+        index: int,
+        used_filenames: set[str],
+    ) -> str:
+        original = filename or ""
+
+        cleaned = original.strip()
+        cleaned = cleaned.replace("\\", "/")
+        cleaned = cleaned.split("/")[-1]
+
+        cleaned = re.sub(r'[<>:"/\\|?*&=]', "-", cleaned)
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
+        cleaned = cleaned.strip(". ")
+
+        if not cleaned or cleaned.startswith("-format-"):
+            extension = mimetypes.guess_extension(mime_type or "") or ".bin"
+            short_hash = checksum[:8] if checksum else f"{index:04d}"
+            cleaned = f"evernote-attachment-{short_hash}{extension}"
+
+        if "." not in Path(cleaned).name:
+            extension = mimetypes.guess_extension(mime_type or "") or ".bin"
+            cleaned = f"{cleaned}{extension}"
+
+        base = Path(cleaned).stem
+        suffix = Path(cleaned).suffix
+
+        candidate = cleaned
+        counter = 2
+
+        while candidate.lower() in used_filenames:
+            candidate = f"{base}-{counter}{suffix}"
+            counter += 1
+
+        used_filenames.add(candidate.lower())
+
+        return candidate
 
     def _safe_filename(self, item: KnowledgeItem) -> str:
         base = slugify(item.title) or item.id

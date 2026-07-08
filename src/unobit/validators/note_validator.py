@@ -6,7 +6,7 @@ class NoteValidator:
         messages: list[ValidationMessage] = []
 
         title = getattr(item, "title", None)
-        content = getattr(item, "content", None)
+        body = getattr(item, "body", None)
 
         if not title or not str(title).strip():
             messages.append(
@@ -17,12 +17,12 @@ class NoteValidator:
                 )
             )
 
-        if content is None:
+        if body is None:
             messages.append(
                 ValidationMessage(
                     level="error",
-                    code="note-missing-content",
-                    message="Note has no content",
+                    code="note-missing-body",
+                    message="Note has no body",
                 )
             )
 

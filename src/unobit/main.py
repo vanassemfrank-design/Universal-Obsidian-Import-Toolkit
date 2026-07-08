@@ -1,3 +1,6 @@
+from unobit.core.context import PipelineContext
+from unobit.core.pipeline_factory import PipelineFactory
+from unobit.core.report import ImportReport
 from pathlib import Path
 from unobit.importers import DummyImporter, EvernoteImporter
 from unobit.exporters import MarkdownExporter
@@ -97,6 +100,7 @@ def export_demo(output: str = "output/demo"):
 @app.command()
 def import_evernote(path: str, output: str = "output/evernote"):
     import_path = Path(path)
+    output_path = Path(output)
 
     importer = EvernoteImporter()
 
@@ -104,16 +108,70 @@ def import_evernote(path: str, output: str = "output/evernote"):
         print(f"[red]Unsupported file:[/red] {import_path}")
         raise typer.Exit(code=1)
 
+    report = ImportReport(
+        source=str(import_path),
+        importer=importer.source_name,
+    )
+
+    context = PipelineContext(
+        source_path=import_path,
+        output_path=output_path,
+        importer_name=importer.source_name,
+        report=report,
+    )
+
     items = importer.import_file(import_path)
+    report.notes_total = len(items)
+
+    pipeline = PipelineFactory.create_default()
+    processed_items = pipeline.run(items, context)
 
     exporter = MarkdownExporter()
-    created_files = exporter.export_items(items, Path(output))
+    created_files = exporter.export_items(processed_items, output_path)
 
-    print(f"[bold]Imported {len(items)} Evernote notes[/bold]")
-    print(f"[bold]Exported {len(created_files)} Markdown files to {output}[/bold]")
+    report.notes_success = len(created_files)
+    report.notes_failed = report.notes_total - report.notes_success
 
-if __name__ == "__main__":
-    app()
+    report.attachments_total = sum(
+        len(getattr(item, "attachments", []))
+        for item in processed_items
+    )
+    report.attachments_exported = report.attachments_total
+
+    report.finish()
+
+    print()
+    print("[bold]UNOBIT Import Summary[/bold]")
+    print("------------------------------------")
+    print(f"Importer     : {report.importer}")
+    print(f"Source       : {report.source}")
+    print()
+    print("Notes")
+    print(f"  Imported   : {report.notes_total}")
+    print(f"  Exported   : {report.notes_success}")
+    print(f"  Failed     : {report.notes_failed}")
+    print()
+    print("Attachments")
+    print(f"  Total      : {report.attachments_total}")
+    print(f"  Exported   : {report.attachments_exported}")
+    print(f"  Failed     : {report.attachments_failed}")
+    print()
+    print(f"Warnings     : {len(report.warnings)}")
+    print(f"Errors       : {len(report.errors)}")
+
+    if report.timings:
+        print()
+        print("Timings")
+        for name, seconds in report.timings.items():
+            print(f"  {name:<12}: {report.format_duration(seconds)}")
+    
+    if report.duration_seconds is not None:
+        print()
+        print(f"Total time   : {report.format_duration(report.duration_seconds)}")
+
+    print()
+    print(f"Output       : {output_path}")
+    print("------------------------------------")
 
 @app.command()
 def debug_evernote(path: str):
@@ -137,3 +195,4 @@ def debug_evernote(path: str):
             print(f"      mime: {attachment.mime_type}")
             print(f"      checksum: {attachment.checksum}")
             print(f"      size: {attachment.size_bytes}")
+

@@ -47,3 +47,28 @@ class ImportReport:
 
     def add_timing(self, name: str, seconds: float) -> None:
         self.timings[name] = self.timings.get(name, 0.0) + seconds
+
+    def format_duration(self, seconds: float) -> str:
+        """
+        Format a duration using the most appropriate unit.
+        """
+
+        if seconds >= 60:
+            minutes = int(seconds // 60)
+            remaining = seconds % 60
+            return f"{minutes} min {remaining:.2f} s"
+
+        if seconds >= 1:
+            return f"{seconds:.2f} s"
+
+        if seconds >= 0.001:
+            return f"{seconds * 1000:.2f} ms"
+
+        return f"{seconds * 1_000_000:.0f} µs"
+    
+    @property
+    def duration_seconds(self) -> float | None:
+        if self.finished_at is None:
+            return None
+
+        return (self.finished_at - self.started_at).total_seconds()

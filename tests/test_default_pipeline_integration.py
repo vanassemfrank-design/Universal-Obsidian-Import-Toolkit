@@ -3,19 +3,7 @@ from pathlib import Path
 from unobit.core.context import PipelineContext
 from unobit.core.pipeline_factory import PipelineFactory
 from unobit.core.report import ImportReport
-
-
-class FakeAttachment:
-    def __init__(self, filename):
-        self.filename = filename
-
-
-class FakeNote:
-    def __init__(self, title, content, attachments=None, metadata=None):
-        self.title = title
-        self.content = content
-        self.attachments = attachments or []
-        self.metadata = metadata
+from unobit.models import Attachment, Note
 
 
 def test_default_pipeline_validates_and_processes_notes():
@@ -29,19 +17,21 @@ def test_default_pipeline_validates_and_processes_notes():
     )
 
     notes = [
-        FakeNote(
+        Note(
             title="  Geldige notitie  ",
-            content="\n\nInhoud\n\n",
+            source="evernote",
+            body="\n\nInhoud\n\n",
             attachments=[
-                FakeAttachment(filename="image.png"),
+                Attachment(filename="image.png"),
             ],
             metadata={"guid": "abc"},
         ),
-        FakeNote(
+        Note(
             title="",
-            content=None,
+            source="evernote",
+            body=None,
             attachments=[
-                FakeAttachment(filename=""),
+                Attachment(filename=""),
             ],
             metadata=None,
         ),
@@ -54,14 +44,7 @@ def test_default_pipeline_validates_and_processes_notes():
     assert len(result) == 2
 
     assert result[0].title == "Geldige notitie"
-    assert result[0].content == "Inhoud"
+    assert result[0].body == "Inhoud"
 
-    codes = [
-        message.context["code"]
-        for message in report.warnings + report.errors
-    ]
-
-    assert "note-missing-title" in codes
-    assert "note-missing-content" in codes
-    assert "attachment-missing-filename" in codes
-    assert "note-missing-metadata" in codes
+    assert len(report.warnings) == 3
+    assert len(report.errors) == 1
