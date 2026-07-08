@@ -31,3 +31,16 @@ def test_enml_converter_converts_todos():
 
     assert "- [ ] Open task" in result
     assert "- [x] Done task" in result
+
+def test_enml_converter_converts_media_to_placeholder():
+    converter = ENMLConverter()
+
+    content = """<?xml version="1.0" encoding="UTF-8"?>
+<en-note><div><en-media type="image/png" hash="abc123"/></div></en-note>
+"""
+
+    result = converter.convert(content)
+
+    assert "UNOBIT-MEDIA" in result
+    assert "image/png" in result
+    assert "abc123" in result

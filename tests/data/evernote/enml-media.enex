@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE en-export SYSTEM "http://xml.evernote.com/pub/evernote-export4.dtd">
+<en-export export-date="20260708T090000Z" application="UNOBIT Test Generator" version="1.0">
+<note>
+  <guid>66666666-6666-6666-6666-666666666666</guid>
+  <title>ENML Media Placeholder</title>
+  <content><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">
+<en-note>
+<div>Image below:</div>
+<div><en-media type="image/png" hash="abc123"/></div>
+<div>PDF below:</div>
+<div><en-media type="application/pdf" hash="def456"/></div>
+</en-note>]]></content>
+  <created>20260708T090000Z</created>
+  <updated>20260708T090000Z</updated>
+  <tag>test</tag>
+  <tag>enml</tag>
+  <tag>media</tag>
+</note>
+
+</en-export>

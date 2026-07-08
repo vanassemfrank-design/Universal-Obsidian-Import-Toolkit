@@ -136,6 +136,7 @@ def main() -> None:
     generate_large_title()
     generate_invalid_internal_link()
     generate_enml_formatting()
+    generate_media_placeholder()
 
 def generate_enml_formatting() -> None:
     body = """
@@ -181,6 +182,27 @@ def generate_enml_formatting() -> None:
     )
 
     write_file("enml-formatting.enex", content)
+
+def generate_media_placeholder() -> None:
+    body = """
+<div>Image below:</div>
+<div><en-media type="image/png" hash="abc123"/></div>
+<div>PDF below:</div>
+<div><en-media type="application/pdf" hash="def456"/></div>
+"""
+
+    content = enex(
+        [
+            note(
+                guid="66666666-6666-6666-6666-666666666666",
+                title="ENML Media Placeholder",
+                body=body,
+                tags=["test", "enml", "media"],
+            )
+        ]
+    )
+
+    write_file("enml-media.enex", content)
 
 if __name__ == "__main__":
     main()
