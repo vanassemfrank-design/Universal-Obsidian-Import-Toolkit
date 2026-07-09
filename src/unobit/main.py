@@ -11,6 +11,10 @@ from rich import print
 from unobit import __version__
 from unobit.models import Bookmark, Note
 
+from unobit.core.performance import MemoryMonitor
+from unobit.reporters.json_report import JsonReportWriter
+
+
 app = typer.Typer(help="Universal Obsidian Import Toolkit")
 
 
@@ -113,6 +117,9 @@ def import_evernote(path: str, output: str = "output/evernote"):
         importer=importer.source_name,
     )
 
+    monitor = MemoryMonitor()
+    monitor.start()
+
     context = PipelineContext(
         source_path=import_path,
         output_path=output_path,
@@ -139,6 +146,14 @@ def import_evernote(path: str, output: str = "output/evernote"):
     report.attachments_exported = report.attachments_total
 
     report.finish()
+
+    report.peak_memory_mb = monitor.stop()
+    report.calculate_statistics()
+
+    JsonReportWriter().write(
+        report,
+        output_path / "import-report.json",
+    )
 
     print()
     print("[bold]UNOBIT Import Summary[/bold]")
@@ -175,7 +190,16 @@ def import_evernote(path: str, output: str = "output/evernote"):
         print(f"Total time   : {report.format_duration(report.duration_seconds)}")
 
     print()
+    print("Performance")
+    print(f"  Notes/sec       : {report.notes_per_second:.2f}")
+    print(f"  Attachments/sec : {report.attachments_per_second:.2f}")
+
+    if report.peak_memory_mb is not None:
+        print(f"  Peak memory     : {report.peak_memory_mb:.2f} MB")
+
+    print()
     print(f"Output       : {output_path}")
+    print(f"Report       : {output_path / 'import-report.json'}")
     print("------------------------------------")
 
 @app.command()

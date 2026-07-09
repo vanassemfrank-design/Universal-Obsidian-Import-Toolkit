@@ -29,6 +29,14 @@ class ImportReport:
     media_resolved: int = 0
     media_unresolved: int = 0
 
+    notes_per_second: float = 0.0
+    attachments_per_second: float = 0.0
+
+    peak_memory_mb: float | None = None
+
+    largest_note_bytes: int = 0
+    largest_attachment_bytes: int = 0
+
     warnings: list[ImportMessage] = field(default_factory=list)
     errors: list[ImportMessage] = field(default_factory=list)
 
@@ -69,6 +77,15 @@ class ImportReport:
             return f"{seconds * 1000:.2f} ms"
 
         return f"{seconds * 1_000_000:.0f} µs"
+    
+    def calculate_statistics(self) -> None:
+        duration = self.duration_seconds
+
+        if duration is None or duration <= 0:
+            return
+
+        self.notes_per_second = self.notes_success / duration
+        self.attachments_per_second = self.attachments_exported / duration
     
     @property
     def duration_seconds(self) -> float | None:
