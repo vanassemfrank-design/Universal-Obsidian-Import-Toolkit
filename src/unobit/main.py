@@ -4,6 +4,7 @@ from unobit.core.report import ImportReport
 from pathlib import Path
 from unobit.importers import DummyImporter, EvernoteImporter
 from unobit.exporters import MarkdownExporter
+from unobit.services.import_service import run_evernote_import
 
 import typer
 from rich import print
@@ -13,6 +14,7 @@ from unobit.models import Bookmark, Note
 
 from unobit.core.performance import MemoryMonitor
 from unobit.reporters.json_report import JsonReportWriter
+from unobit.config.settings import load_settings, write_default_settings
 
 
 app = typer.Typer(help="Universal Obsidian Import Toolkit")
@@ -112,104 +114,13 @@ def export_demo(output: str = "output/demo"):
 
 @import_app.command("evernote")
 def import_evernote(path: str, output: str = "output/evernote"):
-    import_path = Path(path)
-    output_path = Path(output)
-
-    importer = EvernoteImporter()
-
-    if not importer.supports_file(import_path):
-        print(f"[red]Unsupported file:[/red] {import_path}")
+    try:
+        report = run_evernote_import(path, output)
+    except ValueError as error:
+        print(f"[red]{error}[/red]")
         raise typer.Exit(code=1)
 
-    report = ImportReport(
-        source=str(import_path),
-        importer=importer.source_name,
-    )
 
-    monitor = MemoryMonitor()
-    monitor.start()
-
-    context = PipelineContext(
-        source_path=import_path,
-        output_path=output_path,
-        importer_name=importer.source_name,
-        report=report,
-    )
-
-    items = importer.import_file(import_path)
-    report.notes_total = len(items)
-
-    pipeline = PipelineFactory.create_default()
-    processed_items = pipeline.run(items, context)
-
-    exporter = MarkdownExporter()
-    created_files = exporter.export_items(processed_items, output_path)
-
-    report.notes_success = len(created_files)
-    report.notes_failed = report.notes_total - report.notes_success
-
-    report.attachments_total = sum(
-        len(getattr(item, "attachments", []))
-        for item in processed_items
-    )
-    report.attachments_exported = report.attachments_total
-
-    report.finish()
-
-    report.peak_memory_mb = monitor.stop()
-    report.calculate_statistics()
-
-    JsonReportWriter().write(
-        report,
-        output_path / "import-report.json",
-    )
-
-    print()
-    print("[bold]UNOBIT Import Summary[/bold]")
-    print("------------------------------------")
-    print(f"Importer     : {report.importer}")
-    print(f"Source       : {report.source}")
-    print()
-    print("Notes")
-    print(f"  Imported   : {report.notes_total}")
-    print(f"  Exported   : {report.notes_success}")
-    print(f"  Failed     : {report.notes_failed}")
-    print()
-    print("Attachments")
-    print(f"  Total      : {report.attachments_total}")
-    print(f"  Exported   : {report.attachments_exported}")
-    print(f"  Failed     : {report.attachments_failed}")
-    print()
-    print("Media")
-    print(f"  Total      : {report.media_total}")
-    print(f"  Resolved   : {report.media_resolved}")
-    print(f"  Unresolved : {report.media_unresolved}")
-    print()
-    print(f"Warnings     : {len(report.warnings)}")
-    print(f"Errors       : {len(report.errors)}")
-
-    if report.timings:
-        print()
-        print("Timings")
-        for name, seconds in report.timings.items():
-            print(f"  {name:<12}: {report.format_duration(seconds)}")
-    
-    if report.duration_seconds is not None:
-        print()
-        print(f"Total time   : {report.format_duration(report.duration_seconds)}")
-
-    print()
-    print("Performance")
-    print(f"  Notes/sec       : {report.notes_per_second:.2f}")
-    print(f"  Attachments/sec : {report.attachments_per_second:.2f}")
-
-    if report.peak_memory_mb is not None:
-        print(f"  Peak memory     : {report.peak_memory_mb:.2f} MB")
-
-    print()
-    print(f"Output       : {output_path}")
-    print(f"Report       : {output_path / 'import-report.json'}")
-    print("------------------------------------")
 
 @app.command()
 def debug_evernote(path: str):
@@ -234,3 +145,18 @@ def debug_evernote(path: str):
             print(f"      checksum: {attachment.checksum}")
             print(f"      size: {attachment.size_bytes}")
 
+@config_app.command("init")
+def config_init(path: str = "unobit.yaml"):
+    created_path = write_default_settings(path)
+    print(f"[green]Configuration ready:[/green] {created_path}")
+
+
+@config_app.command("show")
+def config_show(path: str = "unobit.yaml"):
+    settings = load_settings(path)
+
+    print("[bold]UNOBIT Configuration[/bold]")
+    print(f"output      : {settings.output}")
+    print(f"language    : {settings.language}")
+    print(f"json_report : {settings.json_report}")
+    print(f"html_report : {settings.html_report}")

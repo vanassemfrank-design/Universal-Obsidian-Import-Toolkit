@@ -1,0 +1,4 @@
+output: output/evernote
+language: en
+json_report: true
+html_report: false
