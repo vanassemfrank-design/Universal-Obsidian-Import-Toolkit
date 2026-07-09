@@ -1,22 +1,47 @@
 # Session Handover
 
-Datum: 2026-07-07
+Date: 2026-07-09
 
-## Vandaag afgerond
+## Sprint Completed
 
-- PipelineContext
-- ProcessingPipeline
-- Validator framework
-- ADR 1 t/m 4
+Sprint 3 — Evernote Production Ready
 
-## Openstaand
+## Completed
 
-- ValidatorStep
+- Pipeline-integratie voor Evernote-import.
+- ImportReport + timings + performance metrics.
+- JSON import report.
+- Resolver framework.
+- Evernote internal link resolution.
+- ENMLConverter framework.
+- ENML cleanup, todo conversion, media placeholders.
+- Media resolution naar Obsidian attachment-links.
+- ENEX test data generator.
+- Regression test fixtures.
+- Grote ENEX imports getest, inclusief >1 GB bestand.
 
-## Volgende eerste taak
+## Skipped for now
 
-Maak ValidationStep en integreer deze in ProcessingPipeline.
+- Notebook / Stack support.
 
-## Belangrijke opmerkingen
+## Next Sprint
 
-Pipeline mag uitsluitend werken op het Universele Note-model.
+Sprint 4 — CLI, Configuration & Beta GUI
+
+## First Task Next Session
+
+Design the new CLI command structure:
+- `unobit import evernote`
+- `unobit config`
+- `unobit report`
+- `unobit gui`
+
+## Context Files to Load Next Session
+
+- README.md
+- ROADMAP.md
+- CHANGELOG.md
+- Project-state.md
+- session-handover.md
+- docs/adr/*
+- unobit-source-bundle.md

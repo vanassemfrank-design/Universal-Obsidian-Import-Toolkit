@@ -1,44 +1,53 @@
 from pathlib import Path
+from datetime import datetime
 
-ROOT = Path("src/unobit")
-OUTPUT = Path("docs/code-context/unobit-source-bundle.md")
-
-EXCLUDE_DIRS = {
-    "__pycache__",
-}
-
-EXCLUDE_SUFFIXES = {
-    ".pyc",
-}
-
-def should_include(path: Path) -> bool:
-    if any(part in EXCLUDE_DIRS for part in path.parts):
-        return False
-
-    if path.suffix in EXCLUDE_SUFFIXES:
-        return False
-
-    return path.suffix == ".py"
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE_DIR = ROOT / "src" / "unobit"
+OUTPUT_FILE = ROOT / "docs" / "source-bundle.md"
 
 
 def main() -> None:
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-    files = sorted(path for path in ROOT.rglob("*") if path.is_file() and should_include(path))
+    files = sorted(SOURCE_DIR.rglob("*.py"))
 
-    with OUTPUT.open("w", encoding="utf-8") as out:
-        out.write("# UNOBIT Source Bundle\n\n")
-        out.write("> Generated from `src/unobit`.\n\n")
+    lines = [
+        "# UNOBIT Source Bundle",
+        "",
+        f"Generated: {datetime.now().isoformat(timespec='seconds')}",
+        f"Source: `{SOURCE_DIR}`",
+        "",
+        "---",
+        "",
+        "## Files",
+        "",
+    ]
 
-        for file in files:
-            relative = file.as_posix()
+    for file in files:
+        rel = file.relative_to(ROOT)
+        lines.append(f"- `{rel}`")
 
-            out.write(f"## `{relative}`\n\n")
-            out.write("```python\n")
-            out.write(file.read_text(encoding="utf-8"))
-            out.write("\n```\n\n")
+    lines.extend(["", "---", ""])
 
-    print(f"Wrote {OUTPUT}")
+    for file in files:
+        rel = file.relative_to(ROOT)
+        content = file.read_text(encoding="utf-8")
+
+        lines.extend(
+            [
+                f"## `{rel}`",
+                "",
+                "```python",
+                content.rstrip(),
+                "```",
+                "",
+                "---",
+                "",
+            ]
+        )
+
+    OUTPUT_FILE.write_text("\n".join(lines), encoding="utf-8")
+    print(f"Written: {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":

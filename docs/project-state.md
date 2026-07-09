@@ -1,113 +1,260 @@
-# UNOBIT Project State
+# Universal Obsidian Import Toolkit (UNOBIT)
 
-> Laatst bijgewerkt: 2026-07-07
-> Sprint: 2
-> Versie: 0.2.0-dev
+Last updated: 2026-07-09
+
+Project status: Sprint 3 Completed
+Current version: v0.3.0-sprint3
+Next milestone: v0.4.0-beta
 
 ---
 
-# Current Status
+# Vision
 
-Sprint 0
-- [x] Repository
-- [x] CLI
-- [x] Packaging
-- [x] Documentation
+UNOBIT is an open-source toolkit for importing knowledge from multiple platforms into Obsidian while preserving as much metadata, structure and attachments as possible.
 
-Sprint 1
-- [x] Universal Note Model
-- [x] Evernote ENEX streaming parser
-- [x] Markdown Exporter
-- [x] Attachment export
-- [x] Localization foundation
+Current focus:
+- Evernote
 
-Sprint 2
-- [x] ImportReport
-- [x] PipelineContext
-- [x] ProcessingPipeline
-- [x] Validator base
-- [ ] ValidatorStep
-- [ ] Performance profiler
-- [ ] Pipeline refactor
+Planned:
+- OneNote
+- Markdown
+- Chrome Bookmarks
+- Future plugin architecture
 
 ---
 
 # Current Architecture
 
 Importer
-→ Pipeline
-→ Validators
-→ Processors
-→ Exporter
-→ ImportReport
+    ↓
+Validation
+    ↓
+Processing
+    ↓
+Resolution
+    ↓
+Exporter
+
+Supporting components
+
+- ImportReport
+- Performance reporting
+- JSON report writer
+- ENML conversion framework
+- Test data generator
 
 ---
 
-# Important Decisions
+# Implemented
 
-- Universal Note Model is the canonical data model.
-- Obsidian is the primary export target.
-- Streaming parsing is preferred over full-memory parsing.
-- Architecture decisions are documented as ADRs.
+## Evernote
+
+✔ ENEX parsing
+
+✔ Attachments
+
+✔ Markdown export
+
+✔ Internal note links
+
+✔ ENML conversion
+
+✔ Todo conversion
+
+✔ Media placeholders
+
+✔ Attachment resolution
+
+✔ Performance metrics
+
+✔ JSON import report
 
 ---
 
-# Current Folder Structure
+# Testing
 
-src/
-docs/
+Unit tests
+
+Integration tests
+
+Regression ENEX files
+
+Generated test fixtures
+
+Large ENEX testing (>1GB)
+
+Current status
+
+All tests green
+
+---
+
+# Repository Structure
+
+src/unobit
+
+core/
+
+enml/
+
+exporters/
+
+importers/
+
+processors/
+
+reporters/
+
+resolvers/
+
+validators/
+
 tests/
-samples/
+
+tools/
+
+docs/
 
 ---
 
-# Active TODO
+# Technical Debt
 
-1. ValidatorStep
-2. Pipeline integration
-3. Performance profiler
-4. Refactor Evernote importer
-5. Sprint 3 planning
+Notebook / Stack support
 
----
+Streaming importer
 
-# Known Technical Debt
+Duplicate attachment detection
 
-- Evernote importer still bypasses parts of the new pipeline.
-- ImportReport not yet integrated everywhere.
-- Validators are not yet executed by the pipeline.
+Incremental import
 
----
+Filename conflict handling improvements
 
-# Next Session Start
+Parallel processing
 
-Continue with:
-Sprint 2.5 - ValidatorStep
+HTML report
 
-Do NOT redesign:
-- Universal Note Model
-- Plugin Architecture
-- ADR structure
+GUI
 
-Assume these are accepted.
+Configuration system
+
+Plugin API
 
 ---
 
-# Future Roadmap
+# Risks
+
+Very large ENEX files (>2 GB)
+
+Very large attachments
+
+Evernote HTML edge cases
+
+Unsupported ENML elements
+
+---
+
+# Coding Principles
+
+Small commits
+
+Test first
+
+Regression tests
+
+Pipeline based architecture
+
+Importer independent models
+
+Separation of concerns
+
+---
+
+# Sprint Summary
+
+Sprint 0
+
+Repository setup
+
+Sprint 1
+
+Evernote MVP
+
+Sprint 2
+
+Pipeline architecture
+
+Validation
+
+ImportReport
 
 Sprint 3
-- Evernote archive-quality import
-- Internal note links
-- Notebook/Stack support
-- Tag refinement
-- Validation report
-- Archive verification
 
-Sprint 4
-- OneNote Importer
+Reference Resolution
 
-Sprint 5
-- ChatGPT Importer
+ENML framework
 
-Sprint 6
-- Plugin SDK
+Media resolution
+
+Performance metrics
+
+Regression framework
+
+Status: Complete
+
+---
+
+# Sprint 4 Goals
+
+CLI redesign
+
+Configuration (unobit.yaml)
+
+HTML/JavaScript GUI
+
+HTML report
+
+Public beta packaging
+
+Documentation polish
+
+---
+
+# Definition of Done (Beta)
+
+CLI stable
+
+Configuration file
+
+GUI prototype
+
+Performance report
+
+JSON report
+
+Documentation complete
+
+Regression suite green
+
+Large ENEX validated
+
+GitHub release
+
+PyPI-ready packaging
+
+---
+
+# Nice-to-have after Beta
+
+OneNote importer
+
+Markdown importer
+
+Chrome Bookmarks importer
+
+Plugin API
+
+Streaming pipeline
+
+Duplicate detection
+
+Incremental synchronization

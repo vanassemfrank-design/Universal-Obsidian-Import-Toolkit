@@ -1,0 +1,10 @@
+1 test applicatie
+unobit import-evernote "samples\evernote\Mijn notities.enex"
+
+2 pytest
+
+3 git
+
+git add .
+git commit -m "beschrijving"
+git push
