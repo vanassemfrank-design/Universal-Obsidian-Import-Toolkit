@@ -16,6 +16,15 @@ from unobit.reporters.json_report import JsonReportWriter
 
 
 app = typer.Typer(help="Universal Obsidian Import Toolkit")
+import_app = typer.Typer(help="Import commands")
+config_app = typer.Typer(help="Configuration commands")
+report_app = typer.Typer(help="Report commands")
+gui_app = typer.Typer(help="GUI commands")
+
+app.add_typer(import_app, name="import")
+app.add_typer(config_app, name="config")
+app.add_typer(report_app, name="report")
+app.add_typer(gui_app, name="gui")
 
 
 @app.command()
@@ -101,7 +110,7 @@ def export_demo(output: str = "output/demo"):
     for file_path in created_files:
         print(file_path)
 
-@app.command()
+@import_app.command("evernote")
 def import_evernote(path: str, output: str = "output/evernote"):
     import_path = Path(path)
     output_path = Path(output)
