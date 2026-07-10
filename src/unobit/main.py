@@ -7,6 +7,7 @@ from unobit.exporters import MarkdownExporter
 from unobit.services.import_service import run_evernote_import
 
 import typer
+import json
 from rich import print
 
 from unobit import __version__
@@ -113,12 +114,67 @@ def export_demo(output: str = "output/demo"):
         print(file_path)
 
 @import_app.command("evernote")
-def import_evernote(path: str, output: str = "output/evernote"):
+def import_evernote(
+    path: str,
+    output: str | None = None,
+    config: str = "unobit.yaml",
+):
     try:
-        report = run_evernote_import(path, output)
+        settings = load_settings(config)
+        resolved_output = output or settings.output
+        report = run_evernote_import(path, resolved_output)
     except ValueError as error:
         print(f"[red]{error}[/red]")
         raise typer.Exit(code=1)
+    
+    output_path = Path(resolved_output)
+
+    print()
+    print("[bold]UNOBIT Import Summary[/bold]")
+    print("------------------------------------")
+    print(f"Importer     : {report.importer}")
+    print(f"Source       : {report.source}")
+    print()
+    print("Notes")
+    print(f"  Imported   : {report.notes_total}")
+    print(f"  Exported   : {report.notes_success}")
+    print(f"  Failed     : {report.notes_failed}")
+    print()
+    print("Attachments")
+    print(f"  Total      : {report.attachments_total}")
+    print(f"  Exported   : {report.attachments_exported}")
+    print(f"  Failed     : {report.attachments_failed}")
+    print()
+    print("Media")
+    print(f"  Total      : {report.media_total}")
+    print(f"  Resolved   : {report.media_resolved}")
+    print(f"  Unresolved : {report.media_unresolved}")
+    print()
+    print(f"Warnings     : {len(report.warnings)}")
+    print(f"Errors       : {len(report.errors)}")
+
+    if report.timings:
+        print()
+        print("Timings")
+        for name, seconds in report.timings.items():
+            print(f"  {name:<12}: {report.format_duration(seconds)}")
+
+    if report.duration_seconds is not None:
+        print()
+        print(f"Total time   : {report.format_duration(report.duration_seconds)}")
+
+    print()
+    print("Performance")
+    print(f"  Notes/sec       : {report.notes_per_second:.2f}")
+    print(f"  Attachments/sec : {report.attachments_per_second:.2f}")
+
+    if report.peak_memory_mb is not None:
+        print(f"  Peak memory     : {report.peak_memory_mb:.2f} MB")
+
+    print()
+    print(f"Output       : {output_path}")
+    print(f"Report       : {output_path / 'import-report.json'}")
+    print("------------------------------------")
 
 
 
@@ -156,7 +212,45 @@ def config_show(path: str = "unobit.yaml"):
     settings = load_settings(path)
 
     print("[bold]UNOBIT Configuration[/bold]")
-    print(f"output      : {settings.output}")
+    output_path = Path(resolved_output)
+
+    print(f"Output       : {output_path}")
+    print(f"Report       : {output_path / 'import-report.json'}")
     print(f"language    : {settings.language}")
     print(f"json_report : {settings.json_report}")
     print(f"html_report : {settings.html_report}")
+
+@report_app.command("show")
+def report_show(path: str):
+    report_path = Path(path)
+
+    if not report_path.exists():
+        print(f"[red]Report not found:[/red] {report_path}")
+        raise typer.Exit(code=1)
+
+    data = json.loads(report_path.read_text(encoding="utf-8"))
+
+    print()
+    print("[bold]UNOBIT Report[/bold]")
+    print("------------------------------------")
+    print(f"Importer     : {data.get('importer')}")
+    print(f"Source       : {data.get('source')}")
+    print()
+    print("Notes")
+    print(f"  Imported   : {data.get('notes_total')}")
+    print(f"  Exported   : {data.get('notes_success')}")
+    print(f"  Failed     : {data.get('notes_failed')}")
+    print()
+    print("Attachments")
+    print(f"  Total      : {data.get('attachments_total')}")
+    print(f"  Exported   : {data.get('attachments_exported')}")
+    print(f"  Failed     : {data.get('attachments_failed')}")
+    print()
+    print("Media")
+    print(f"  Total      : {data.get('media_total')}")
+    print(f"  Resolved   : {data.get('media_resolved')}")
+    print(f"  Unresolved : {data.get('media_unresolved')}")
+    print()
+    print(f"Warnings     : {len(data.get('warnings', []))}")
+    print(f"Errors       : {len(data.get('errors', []))}")
+    print("------------------------------------")
