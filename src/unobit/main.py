@@ -10,6 +10,8 @@ import typer
 import json
 from rich import print
 
+from unobit.gui.server import start_gui
+
 from unobit import __version__
 from unobit.models import Bookmark, Note
 
@@ -254,3 +256,15 @@ def report_show(path: str):
     print(f"Warnings     : {len(data.get('warnings', []))}")
     print(f"Errors       : {len(data.get('errors', []))}")
     print("------------------------------------")
+
+@gui_app.command("start")
+def gui_start(
+    host: str = "127.0.0.1",
+    port: int = 8765,
+    no_browser: bool = False,
+):
+    start_gui(
+        host=host,
+        port=port,
+        open_browser=not no_browser,
+    )

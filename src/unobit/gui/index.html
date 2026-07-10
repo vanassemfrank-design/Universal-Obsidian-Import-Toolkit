@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UNOBIT</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    main {
+      background: white;
+      padding: 32px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 4px;
+      background: #e6f4ea;
+      color: #176b2c;
+      font-weight: bold;
+    }
+
+    code {
+      background: #eee;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>Universal Obsidian Import Toolkit</h1>
+
+    <p>Import your knowledge. Preserve your history.</p>
+
+    <p>
+      Status:
+      <span class="status">GUI prototype running</span>
+    </p>
+
+    <h2>Evernote import</h2>
+
+    <p>Use the CLI to start an import:</p>
+
+    <pre><code>unobit import evernote "archive.enex"</code></pre>
+
+    <h2>Reports</h2>
+
+    <p>
+      Import reports are created in the configured output directory:
+    </p>
+
+    <ul>
+      <li><code>import-report.json</code></li>
+      <li><code>import-report.html</code></li>
+    </ul>
+
+    <h2>Public beta</h2>
+
+    <p>
+      This interface is an early local prototype for Sprint 4.
+    </p>
+  </main>
+</body>
+</html>
