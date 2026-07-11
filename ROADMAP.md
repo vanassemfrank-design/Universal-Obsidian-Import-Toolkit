@@ -1,101 +1,197 @@
-# ROADMAP
+# UNOBIT Roadmap
 
 ## Vision
 
-Build the most reliable open-source toolkit for importing knowledge into Obsidian while preserving content, metadata, attachments and relationships.
+Build the most reliable open-source toolkit for migrating knowledge into Obsidian while preserving content, metadata, attachments, links and history.
 
 ---
 
-# Phase 0 — Repository Foundation
+# Sprint 0 — Repository Foundation
 
-Status: In Progress
+**Status:** ✅ Completed
 
-* Repository structure
-* Documentation
-* Configuration system
-* Logging framework
-* CLI skeleton
-* Universal data model design
-
----
-
-# Phase 1 — Evernote Importer (MVP)
-
-Goal: Import ENEX into Obsidian.
-
-Features:
-
-* Parse ENEX
-* Read metadata
-* Read attachments
-* Convert ENML to Markdown
-* Preserve timestamps
-* Preserve tags
-* Generate YAML
-* Export Markdown
-* Validation report
+- Repository structure
+- CLI foundation
+- Packaging
+- Documentation
+- Configuration foundation
+- Localization foundation
 
 ---
 
-# Phase 2 — Processing Engine
+# Sprint 1 — Evernote MVP
 
-* Universal Note Model
-* Attachment Manager
-* Link Resolver
-* Markdown Processor
-* YAML Generator
-* Duplicate Detection
-* Validation Engine
+**Status:** ✅ Completed
 
----
-
-# Phase 3 — Additional Importers
-
-* Notion
-* ChatGPT
-* HTML
-* Word
-* PDF
-* OneNote
+- Universal Knowledge Model
+- ENEX parser
+- Markdown exporter
+- Attachment export
+- YAML Frontmatter
+- Localization support
 
 ---
 
-# Phase 4 — AI Enhancement
+# Sprint 2 — Processing Engine
 
-* Automatic tagging
-* Suggested aliases
-* Related note detection
-* Duplicate suggestions
-* Metadata enrichment
-* Knowledge graph support
+**Status:** ✅ Completed
 
----
+## Core
 
-# Phase 5 — User Interface
+- ImportReport
+- PipelineContext
+- ProcessingPipeline
+- PipelineFactory
 
-* Desktop GUI
-* Drag-and-drop imports
-* Progress reporting
-* Import wizard
-* Configuration editor
+## Validation
 
----
+- Validation framework
+- Validators
+- Processing framework
 
-# Phase 6 — Community Edition
+## Testing
 
-* Plugin SDK
-* Developer documentation
-* Example plugins
-* CI/CD
-* Package distribution
-* Obsidian integration
+- Unit tests
+- Integration tests
+
+## Documentation
+
+- Architecture documentation
+- ADR foundation
 
 ---
 
-# Long-Term Goals
+# Sprint 3 — Evernote Production Ready
 
-* Stable plugin API
-* Cross-platform support
-* Enterprise-scale imports
-* Continuous validation
-* Fully automated migration workflows
+**Status:** ✅ Completed
+
+## Added
+
+- Pipeline integration
+- Reference Resolution
+- ENML conversion framework
+- Internal Evernote links
+- Media placeholder resolution
+- Performance metrics
+- JSON reports
+- Regression framework
+- Large ENEX validation
+
+### Goal achieved
+
+A user can archive Evernote completely and continue working only in Obsidian.
+
+---
+
+# Sprint 4 — CLI, Configuration & Beta Foundation
+
+**Status:** ✅ Completed
+
+## Added
+
+- Nested CLI command structure
+- ImportService abstraction
+- `unobit.yaml` configuration
+- Configuration validation
+- HTML report generation
+- HTML/JavaScript GUI prototype
+- Report viewer
+- CLI integration tests
+- ImportService tests
+
+### Goal achieved
+
+Stable beta-ready architecture for command line usage and local GUI prototype.
+
+---
+
+# Sprint 5 — Public Beta & User Experience
+
+**Status:** Planned
+
+## 5.1 Professional HTML Reports
+
+- Responsive report layout
+- CSS styling
+- Summary dashboard
+- Warnings and errors tables
+- Pipeline timings
+- Performance overview
+- Print-friendly output
+
+## 5.2 GUI Import Wizard
+
+- Select archive
+- Select output folder
+- Configuration options
+- Import progress
+- Start import
+
+## 5.3 GUI Report Viewer
+
+- Import summary
+- Open HTML report
+- Open output folder
+- Import another archive
+
+## 5.4 System Doctor
+
+New command:
+
+```text
+unobit doctor
+```
+
+Checks:
+
+- Python installation
+- Dependencies
+- Configuration
+- Output permissions
+- GUI availability
+- Report writers
+
+## 5.5 Beta Packaging
+
+- Packaging cleanup
+- Example configuration
+- Installation improvements
+- Release preparation
+
+## 5.6 Documentation
+
+- README
+- User Guide
+- Developer Guide
+- FAQ
+- Public Beta Checklist
+
+## 5.7 Public Beta Release
+
+### Definition of Done
+
+- All tests green
+- GUI functional
+- HTML reports complete
+- Documentation complete
+- Large ENEX validated
+- Public beta release
+
+---
+
+# Sprint 6 — AI Enhancement
+
+- Automatic tagging
+- Duplicate detection
+- Metadata enrichment
+- Knowledge graph support
+
+---
+
+# Sprint 7 — Community Edition
+
+- Plugin SDK
+- CI/CD
+- Package distribution
+- Example plugins
+- Community extensions

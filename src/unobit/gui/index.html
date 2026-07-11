@@ -8,7 +8,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 900px;
+      max-width: 1000px;
       margin: 40px auto;
       padding: 0 20px;
       background: #f5f5f5;
@@ -35,10 +35,50 @@
       font-weight: bold;
     }
 
-    code {
-      background: #eee;
-      padding: 2px 6px;
-      border-radius: 3px;
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .card {
+      padding: 18px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #fafafa;
+    }
+
+    .card strong {
+      display: block;
+      font-size: 1.8rem;
+      margin-top: 8px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    input[type="file"] {
+      margin: 12px 0 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .error {
+      color: #a40000;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -54,28 +94,160 @@
       <span class="status">GUI prototype running</span>
     </p>
 
-    <h2>Evernote import</h2>
+    <h2>Open import report</h2>
 
-    <p>Use the CLI to start an import:</p>
+    <p>Select an UNOBIT <code>import-report.json</code> file.</p>
 
-    <pre><code>unobit import evernote "archive.enex"</code></pre>
+    <input
+      id="report-file"
+      type="file"
+      accept=".json,application/json"
+    >
 
-    <h2>Reports</h2>
+    <p id="error-message" class="error hidden"></p>
 
-    <p>
-      Import reports are created in the configured output directory:
-    </p>
+    <section id="report-view" class="hidden">
+      <h2>Import summary</h2>
 
-    <ul>
-      <li><code>import-report.json</code></li>
-      <li><code>import-report.html</code></li>
-    </ul>
+      <p>
+        <strong>Importer:</strong>
+        <span id="importer"></span>
+      </p>
 
-    <h2>Public beta</h2>
+      <p>
+        <strong>Source:</strong>
+        <span id="source"></span>
+      </p>
 
-    <p>
-      This interface is an early local prototype for Sprint 4.
-    </p>
+      <div class="report-grid">
+        <div class="card">
+          Notes imported
+          <strong id="notes-total">0</strong>
+        </div>
+
+        <div class="card">
+          Notes exported
+          <strong id="notes-success">0</strong>
+        </div>
+
+        <div class="card">
+          Attachments
+          <strong id="attachments-total">0</strong>
+        </div>
+
+        <div class="card">
+          Media resolved
+          <strong id="media-resolved">0</strong>
+        </div>
+
+        <div class="card">
+          Warnings
+          <strong id="warnings-total">0</strong>
+        </div>
+
+        <div class="card">
+          Errors
+          <strong id="errors-total">0</strong>
+        </div>
+      </div>
+
+      <h2>Performance</h2>
+
+      <table>
+        <tbody>
+          <tr>
+            <th>Notes per second</th>
+            <td id="notes-per-second">0</td>
+          </tr>
+          <tr>
+            <th>Attachments per second</th>
+            <td id="attachments-per-second">0</td>
+          </tr>
+          <tr>
+            <th>Peak memory</th>
+            <td id="peak-memory">0 MB</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
   </main>
+
+  <script>
+    const fileInput = document.getElementById("report-file");
+    const reportView = document.getElementById("report-view");
+    const errorMessage = document.getElementById("error-message");
+
+    function setText(id, value) {
+      document.getElementById(id).textContent = value ?? "";
+    }
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.remove("hidden");
+      reportView.classList.add("hidden");
+    }
+
+    function hideError() {
+      errorMessage.textContent = "";
+      errorMessage.classList.add("hidden");
+    }
+
+    function renderReport(report) {
+      hideError();
+
+      setText("importer", report.importer);
+      setText("source", report.source);
+
+      setText("notes-total", report.notes_total ?? 0);
+      setText("notes-success", report.notes_success ?? 0);
+      setText("attachments-total", report.attachments_total ?? 0);
+      setText("media-resolved", report.media_resolved ?? 0);
+
+      setText("warnings-total", report.warnings?.length ?? 0);
+      setText("errors-total", report.errors?.length ?? 0);
+
+      setText(
+        "notes-per-second",
+        Number(report.notes_per_second ?? 0).toFixed(2)
+      );
+
+      setText(
+        "attachments-per-second",
+        Number(report.attachments_per_second ?? 0).toFixed(2)
+      );
+
+      const peakMemory = report.peak_memory_mb;
+
+      setText(
+        "peak-memory",
+        peakMemory == null
+          ? "Unknown"
+          : `${Number(peakMemory).toFixed(2)} MB`
+      );
+
+      reportView.classList.remove("hidden");
+    }
+
+    fileInput.addEventListener("change", async event => {
+      const file = event.target.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      try {
+        const text = await file.text();
+        const report = JSON.parse(text);
+
+        if (!report.importer || !report.source) {
+          throw new Error("The selected file is not a valid UNOBIT report.");
+        }
+
+        renderReport(report);
+      } catch (error) {
+        showError(error.message);
+      }
+    });
+  </script>
 </body>
 </html>

@@ -24,6 +24,9 @@ logs/
 # Local config
 config/config.yaml
 
+# code-context
+docs/code-context/
+
 # Sample/private imports
 samples/**/*.enex
 samples/**/*.zip

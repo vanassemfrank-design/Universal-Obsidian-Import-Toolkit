@@ -8,3 +8,6 @@ docs/session-handover.md – Korte overdracht naar de volgende ontwikkelsessie.
 Met die vier documenten kun je in een nieuwe ChatGPT-sessie eenvoudig zeggen:
 
 "Lees README, ROADMAP, de ADR's, project-state.md en session-handover.md en ga verder."
+
+volgende sessie prompt:
+Start Sprint 5. Lees README, ROADMAP, CHANGELOG, Project-state, session-handover, alle ADR's en de nieuwste source bundle. Focus: professionele HTML-reporting, GUI Import Wizard, GUI Report Viewer, unobit doctor, beta-packaging en documentatie. Werk test-driven en houd de architectuur modulair (Importer → Validation → Processing → Resolution → Exporter → Reports).

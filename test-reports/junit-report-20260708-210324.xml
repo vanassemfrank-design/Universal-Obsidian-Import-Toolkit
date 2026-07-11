@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.271" timestamp="2026-07-08T21:03:25.246758+02:00" hostname="DUBI01"><testcase classname="" name="tests.test_evermpte_enml_conversion" time="0.000"><error message="collection failure">C:\Users\frank\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py:508: in importtestmodule
+    mod = import_path(
+C:\Users\frank\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\pathlib.py:596: in import_path
+    importlib.import_module(module_name)
+C:\Users\frank\AppData\Local\Programs\Python\Python313\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+C:\Users\frank\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\assertion\rewrite.py:188: in exec_module
+    exec(co, module.__dict__)
+tests\test_evermpte_enml_conversion.py:1: in &lt;module&gt;
+    from unobit.importers.evernote.importer import EvernoteImporter
+src\unobit\importers\__init__.py:3: in &lt;module&gt;
+    from unobit.importers.evernote import EvernoteImporter
+src\unobit\importers\evernote\__init__.py:1: in &lt;module&gt;
+    from unobit.importers.evernote.importer import EvernoteImporter
+E     File "C:\dev\vibecoded-pkm\Universal-Obsidian-Import-Toolkit\src\unobit\importers\evernote\importer.py", line 72
+E       soup = BeautifulSoup(content, features="xml")
+E       ^^^^
+E   IndentationError: expected an indented block after function definition on line 71</error></testcase></testsuite></testsuites>

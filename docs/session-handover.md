@@ -1,42 +1,82 @@
 # Session Handover
 
-Date: 2026-07-09
+**Date:** 2026-07-11
 
-## Sprint Completed
+---
 
-Sprint 3 — Evernote Production Ready
+# Sprint Completed
 
-## Completed
+## Sprint 4 — CLI, Configuration & Beta Foundation
 
-- Pipeline-integratie voor Evernote-import.
-- ImportReport + timings + performance metrics.
-- JSON import report.
-- Resolver framework.
-- Evernote internal link resolution.
-- ENMLConverter framework.
-- ENML cleanup, todo conversion, media placeholders.
-- Media resolution naar Obsidian attachment-links.
-- ENEX test data generator.
-- Regression test fixtures.
-- Grote ENEX imports getest, inclusief >1 GB bestand.
+---
 
-## Skipped for now
+# Completed
 
-- Notebook / Stack support.
+## Architecture
 
-## Next Sprint
+- ImportService abstraction
+- Configuration system
+- Configuration validation
+- Nested CLI command structure
 
-Sprint 4 — CLI, Configuration & Beta GUI
+## Reporting
 
-## First Task Next Session
+- JSON report
+- HTML report
+- Report viewer command
 
-Design the new CLI command structure:
-- `unobit import evernote`
-- `unobit config`
-- `unobit report`
-- `unobit gui`
+## GUI
 
-## Context Files to Load Next Session
+- Local HTML/JavaScript prototype
+- JSON report viewer
+
+## Testing
+
+- CLI integration tests
+- ImportService tests
+- Existing regression suite remains green
+
+---
+
+# Current Project Status
+
+**Version:** v0.4.0-dev
+
+**Status:** Stable development build.
+
+The architecture is now ready for user experience improvements and public beta preparation.
+
+---
+
+# Next Sprint
+
+## Sprint 5 — Public Beta & User Experience
+
+### Priority
+
+1. Professional HTML reports
+2. GUI Import Wizard
+3. GUI Report Viewer
+4. `unobit doctor`
+5. Beta packaging
+6. Documentation completion
+
+---
+
+# First Task Next Session
+
+Upgrade the HTML report into a professional standalone report with:
+
+- CSS styling
+- Dashboard cards
+- Warning/Error tables
+- Pipeline timings
+- Performance overview
+- Print-friendly layout
+
+---
+
+# Context Files to Load
 
 - README.md
 - ROADMAP.md
@@ -44,4 +84,18 @@ Design the new CLI command structure:
 - Project-state.md
 - session-handover.md
 - docs/adr/*
-- unobit-source-bundle.md
+- source-bundle.md
+- bundle_sprint5_context.md
+
+---
+
+# Definition of Success for Sprint 5
+
+A first-time user should be able to:
+
+1. Install UNOBIT.
+2. Configure it using `unobit.yaml`.
+3. Import an Evernote archive.
+4. View professional HTML reports.
+5. Use the GUI without needing the CLI.
+6. Successfully complete the Public Beta checklist.

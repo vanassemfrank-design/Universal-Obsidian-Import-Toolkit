@@ -1,6 +1,6 @@
 # UNOBIT Source Bundle
 
-Generated: 2026-07-09T10:41:23
+Generated: 2026-07-11T08:57:28
 Source: `C:\dev\vibecoded-pkm\Universal-Obsidian-Import-Toolkit\src\unobit`
 
 ---
@@ -8,6 +8,8 @@ Source: `C:\dev\vibecoded-pkm\Universal-Obsidian-Import-Toolkit\src\unobit`
 ## Files
 
 - `src\unobit\__init__.py`
+- `src\unobit\config\__init__.py`
+- `src\unobit\config\settings.py`
 - `src\unobit\config.py`
 - `src\unobit\core\__init__.py`
 - `src\unobit\core\batch_processing_step.py`
@@ -32,6 +34,8 @@ Source: `C:\dev\vibecoded-pkm\Universal-Obsidian-Import-Toolkit\src\unobit`
 - `src\unobit\exporters\base.py`
 - `src\unobit\exporters\markdown.py`
 - `src\unobit\exporters\obsidian.py`
+- `src\unobit\gui\__init__.py`
+- `src\unobit\gui\server.py`
 - `src\unobit\importers\__init__.py`
 - `src\unobit\importers\base.py`
 - `src\unobit\importers\dummy\__init__.py`
@@ -61,12 +65,15 @@ Source: `C:\dev\vibecoded-pkm\Universal-Obsidian-Import-Toolkit\src\unobit`
 - `src\unobit\processors\wikilinks.py`
 - `src\unobit\processors\yaml.py`
 - `src\unobit\reporters\__init__.py`
+- `src\unobit\reporters\html_report.py`
 - `src\unobit\reporters\json_report.py`
 - `src\unobit\resolvers\__init__.py.py`
 - `src\unobit\resolvers\attachment_index.py`
 - `src\unobit\resolvers\base.py`
 - `src\unobit\resolvers\evernote_links.py`
 - `src\unobit\resolvers\media_links.py`
+- `src\unobit\services\__init__.py`
+- `src\unobit\services\import_service.py`
 - `src\unobit\utils\__init__.py`
 - `src\unobit\utils\dates.py`
 - `src\unobit\validators\attachment_validator.py`
@@ -87,6 +94,178 @@ Import once. Preserve forever.
 """
 
 __version__ = "0.1.0"
+```
+
+---
+
+## `src\unobit\config\__init__.py`
+
+```python
+
+```
+
+---
+
+## `src\unobit\config\settings.py`
+
+```python
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+
+SUPPORTED_LANGUAGES = {"en", "nl"}
+
+
+class ConfigError(ValueError):
+    """Raised when an UNOBIT configuration file is invalid."""
+
+
+@dataclass
+class UnobitSettings:
+    output: str = "output/evernote"
+    language: str = "en"
+    json_report: bool = True
+    html_report: bool = False
+
+
+def load_settings(
+    path: str | Path = "unobit.yaml",
+) -> UnobitSettings:
+    config_path = Path(path)
+
+    if not config_path.exists():
+        return UnobitSettings()
+
+    try:
+        raw_data = config_path.read_text(encoding="utf-8")
+        loaded_data = yaml.safe_load(raw_data)
+    except OSError as error:
+        raise ConfigError(
+            f"Could not read configuration file: {config_path}"
+        ) from error
+    except yaml.YAMLError as error:
+        raise ConfigError(
+            f"Invalid YAML in configuration file: {config_path}"
+        ) from error
+
+    if loaded_data is None:
+        data: dict[str, Any] = {}
+    elif isinstance(loaded_data, dict):
+        data = loaded_data
+    else:
+        raise ConfigError(
+            "Configuration root must be a YAML object."
+        )
+
+    settings = UnobitSettings(
+        output=_read_string(
+            data,
+            key="output",
+            default="output/evernote",
+        ),
+        language=_read_string(
+            data,
+            key="language",
+            default="en",
+        ).lower(),
+        json_report=_read_boolean(
+            data,
+            key="json_report",
+            default=True,
+        ),
+        html_report=_read_boolean(
+            data,
+            key="html_report",
+            default=False,
+        ),
+    )
+
+    validate_settings(settings)
+
+    return settings
+
+
+def validate_settings(settings: UnobitSettings) -> None:
+    if not settings.output.strip():
+        raise ConfigError(
+            "Configuration value 'output' cannot be empty."
+        )
+
+    if settings.language not in SUPPORTED_LANGUAGES:
+        supported = ", ".join(sorted(SUPPORTED_LANGUAGES))
+
+        raise ConfigError(
+            "Unsupported language "
+            f"'{settings.language}'. Supported: {supported}."
+        )
+
+    if not settings.json_report and not settings.html_report:
+        raise ConfigError(
+            "At least one report format must be enabled: "
+            "'json_report' or 'html_report'."
+        )
+
+
+def write_default_settings(
+    path: str | Path = "unobit.yaml",
+) -> Path:
+    config_path = Path(path)
+
+    if config_path.exists():
+        return config_path
+
+    config_path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    config_path.write_text(
+        "\n".join(
+            [
+                "output: output/evernote",
+                "language: en",
+                "json_report: true",
+                "html_report: false",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    return config_path
+
+
+def _read_string(
+    data: dict[str, Any],
+    key: str,
+    default: str,
+) -> str:
+    value = data.get(key, default)
+
+    if not isinstance(value, str):
+        raise ConfigError(
+            f"Configuration value '{key}' must be a string."
+        )
+
+    return value
+
+
+def _read_boolean(
+    data: dict[str, Any],
+    key: str,
+    default: bool,
+) -> bool:
+    value = data.get(key, default)
+
+    if not isinstance(value, bool):
+        raise ConfigError(
+            f"Configuration value '{key}' must be true or false."
+        )
+
+    return value
 ```
 
 ---
@@ -956,6 +1135,55 @@ class MarkdownExporter(BaseExporter):
 
 ---
 
+## `src\unobit\gui\__init__.py`
+
+```python
+
+```
+
+---
+
+## `src\unobit\gui\server.py`
+
+```python
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+import os
+import webbrowser
+
+
+def start_gui(
+    host: str = "127.0.0.1",
+    port: int = 8765,
+    open_browser: bool = True,
+) -> None:
+    gui_path = Path(__file__).parent
+    os.chdir(gui_path)
+
+    url = f"http://{host}:{port}"
+
+    if open_browser:
+        webbrowser.open(url)
+
+    server = ThreadingHTTPServer(
+        (host, port),
+        SimpleHTTPRequestHandler,
+    )
+
+    print(f"UNOBIT GUI running at {url}")
+    print("Press Ctrl+C to stop.")
+
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print()
+        print("UNOBIT GUI stopped.")
+    finally:
+        server.server_close()
+```
+
+---
+
 ## `src\unobit\importers\__init__.py`
 
 ```python
@@ -1225,28 +1453,55 @@ def get_logger(name: str):
 ## `src\unobit\main.py`
 
 ```python
-from unobit.core.context import PipelineContext
-from unobit.core.pipeline_factory import PipelineFactory
-from unobit.core.report import ImportReport
+import json
 from pathlib import Path
-from unobit.importers import DummyImporter, EvernoteImporter
-from unobit.exporters import MarkdownExporter
 
 import typer
 from rich import print
 
 from unobit import __version__
+from unobit.config.settings import (
+    ConfigError,
+    load_settings,
+    write_default_settings,
+)
+from unobit.exporters import MarkdownExporter
+from unobit.gui.server import start_gui
+from unobit.importers import DummyImporter, EvernoteImporter
 from unobit.models import Bookmark, Note
-
-from unobit.core.performance import MemoryMonitor
-from unobit.reporters.json_report import JsonReportWriter
+from unobit.services.import_service import run_evernote_import
 
 
-app = typer.Typer(help="Universal Obsidian Import Toolkit")
+app = typer.Typer(
+    help="Universal Obsidian Import Toolkit",
+)
+
+import_app = typer.Typer(
+    help="Import knowledge archives.",
+)
+
+config_app = typer.Typer(
+    help="Manage UNOBIT configuration.",
+)
+
+report_app = typer.Typer(
+    help="View UNOBIT import reports.",
+)
+
+gui_app = typer.Typer(
+    help="Start the local UNOBIT GUI.",
+)
+
+app.add_typer(import_app, name="import")
+app.add_typer(config_app, name="config")
+app.add_typer(report_app, name="report")
+app.add_typer(gui_app, name="gui")
 
 
 @app.command()
-def info():
+def info() -> None:
+    """Show information about UNOBIT."""
+
     print()
     print("[bold]Universal Obsidian Import Toolkit[/bold]")
     print("UNOBIT")
@@ -1255,12 +1510,16 @@ def info():
 
 
 @app.command()
-def version():
+def version() -> None:
+    """Show the installed UNOBIT version."""
+
     print(__version__)
 
 
 @app.command()
-def demo():
+def demo() -> None:
+    """Show example universal knowledge objects."""
+
     note = Note(
         title="Example Evernote Note",
         source="evernote",
@@ -1283,8 +1542,13 @@ def demo():
     print()
     print(bookmark)
 
+
 @app.command()
-def import_dummy(path: str = "samples/dummy/example.dummy"):
+def import_dummy(
+    path: str = "samples/dummy/example.dummy",
+) -> None:
+    """Import a dummy test file."""
+
     importer = DummyImporter()
     import_path = Path(path)
 
@@ -1294,20 +1558,31 @@ def import_dummy(path: str = "samples/dummy/example.dummy"):
 
     items = importer.import_file(import_path)
 
-    print(f"[bold]Imported {len(items)} items from {import_path}[/bold]")
+    print(
+        f"[bold]Imported {len(items)} items "
+        f"from {import_path}[/bold]"
+    )
     print()
 
     for item in items:
         print(item)
         print()
 
+
 @app.command()
-def export_demo(output: str = "output/demo"):
+def export_demo(
+    output: str = "output/demo",
+) -> None:
+    """Export example objects to Markdown."""
+
     note = Note(
         title="Example Evernote Note",
         source="evernote",
         notebook="Inbox",
-        body="This is a universal note object exported to Markdown.",
+        body=(
+            "This is a universal note object "
+            "exported to Markdown."
+        ),
         tags=["example", "evernote"],
     )
 
@@ -1320,88 +1595,87 @@ def export_demo(output: str = "output/demo"):
     )
 
     exporter = MarkdownExporter()
-    created_files = exporter.export_items([note, bookmark], Path(output))
 
-    print(f"[bold]Exported {len(created_files)} files to {output}[/bold]")
+    created_files = exporter.export_items(
+        [note, bookmark],
+        Path(output),
+    )
+
+    print(
+        f"[bold]Exported {len(created_files)} "
+        f"files to {output}[/bold]"
+    )
     print()
 
     for file_path in created_files:
         print(file_path)
 
-@app.command()
-def import_evernote(path: str, output: str = "output/evernote"):
-    import_path = Path(path)
-    output_path = Path(output)
 
-    importer = EvernoteImporter()
+@import_app.command("evernote")
+def import_evernote(
+    path: str,
+    output: str | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Override the configured output directory.",
+    ),
+    config: str = typer.Option(
+        "unobit.yaml",
+        "--config",
+        "-c",
+        help="Path to the UNOBIT configuration file.",
+    ),
+) -> None:
+    """Import an Evernote ENEX archive."""
 
-    if not importer.supports_file(import_path):
-        print(f"[red]Unsupported file:[/red] {import_path}")
-        raise typer.Exit(code=1)
+    try:
+        settings = load_settings(config)
+    except ConfigError as error:
+        print(f"[red]Configuration error:[/red] {error}")
+        raise typer.Exit(code=2) from error
+    resolved_output = output or settings.output
+    output_path = Path(resolved_output)
 
-    report = ImportReport(
-        source=str(import_path),
-        importer=importer.source_name,
-    )
-
-    monitor = MemoryMonitor()
-    monitor.start()
-
-    context = PipelineContext(
-        source_path=import_path,
-        output_path=output_path,
-        importer_name=importer.source_name,
-        report=report,
-    )
-
-    items = importer.import_file(import_path)
-    report.notes_total = len(items)
-
-    pipeline = PipelineFactory.create_default()
-    processed_items = pipeline.run(items, context)
-
-    exporter = MarkdownExporter()
-    created_files = exporter.export_items(processed_items, output_path)
-
-    report.notes_success = len(created_files)
-    report.notes_failed = report.notes_total - report.notes_success
-
-    report.attachments_total = sum(
-        len(getattr(item, "attachments", []))
-        for item in processed_items
-    )
-    report.attachments_exported = report.attachments_total
-
-    report.finish()
-
-    report.peak_memory_mb = monitor.stop()
-    report.calculate_statistics()
-
-    JsonReportWriter().write(
-        report,
-        output_path / "import-report.json",
-    )
+    try:
+        report = run_evernote_import(
+            path=path,
+            output=resolved_output,
+            language=settings.language,
+            json_report=settings.json_report,
+            html_report=settings.html_report,
+        )
+    except ValueError as error:
+        print(f"[red]{error}[/red]")
+        raise typer.Exit(code=1) from error
+    except Exception as error:
+        print(f"[red]Import failed:[/red] {error}")
+        raise typer.Exit(code=1) from error
 
     print()
     print("[bold]UNOBIT Import Summary[/bold]")
     print("------------------------------------")
     print(f"Importer     : {report.importer}")
     print(f"Source       : {report.source}")
+
     print()
     print("Notes")
     print(f"  Imported   : {report.notes_total}")
     print(f"  Exported   : {report.notes_success}")
     print(f"  Failed     : {report.notes_failed}")
+
     print()
     print("Attachments")
     print(f"  Total      : {report.attachments_total}")
     print(f"  Exported   : {report.attachments_exported}")
     print(f"  Failed     : {report.attachments_failed}")
+
     print()
     print("Media")
     print(f"  Total      : {report.media_total}")
     print(f"  Resolved   : {report.media_resolved}")
     print(f"  Unresolved : {report.media_unresolved}")
+
     print()
     print(f"Warnings     : {len(report.warnings)}")
     print(f"Errors       : {len(report.errors)}")
@@ -1409,44 +1683,217 @@ def import_evernote(path: str, output: str = "output/evernote"):
     if report.timings:
         print()
         print("Timings")
+
         for name, seconds in report.timings.items():
-            print(f"  {name:<12}: {report.format_duration(seconds)}")
-    
+            print(
+                f"  {name:<12}: "
+                f"{report.format_duration(seconds)}"
+            )
+
     if report.duration_seconds is not None:
         print()
-        print(f"Total time   : {report.format_duration(report.duration_seconds)}")
+        print(
+            "Total time   : "
+            f"{report.format_duration(report.duration_seconds)}"
+        )
 
     print()
     print("Performance")
-    print(f"  Notes/sec       : {report.notes_per_second:.2f}")
-    print(f"  Attachments/sec : {report.attachments_per_second:.2f}")
+    print(
+        f"  Notes/sec       : "
+        f"{report.notes_per_second:.2f}"
+    )
+    print(
+        f"  Attachments/sec : "
+        f"{report.attachments_per_second:.2f}"
+    )
 
     if report.peak_memory_mb is not None:
-        print(f"  Peak memory     : {report.peak_memory_mb:.2f} MB")
+        print(
+            f"  Peak memory     : "
+            f"{report.peak_memory_mb:.2f} MB"
+        )
 
     print()
     print(f"Output       : {output_path}")
-    print(f"Report       : {output_path / 'import-report.json'}")
+
+    if settings.json_report:
+        print(
+            f"JSON report  : "
+            f"{output_path / 'import-report.json'}"
+        )
+
+    if settings.html_report:
+        print(
+            f"HTML report  : "
+            f"{output_path / 'import-report.html'}"
+        )
+
     print("------------------------------------")
 
+
+@config_app.command("init")
+def config_init(
+    path: str = typer.Argument(
+        "unobit.yaml",
+        help="Path for the configuration file.",
+    ),
+) -> None:
+    """Create a default UNOBIT configuration file."""
+
+    config_path = Path(path)
+    existed = config_path.exists()
+
+    result_path = write_default_settings(config_path)
+
+    if existed:
+        print(
+            "[yellow]Configuration already exists:[/yellow] "
+            f"{result_path}"
+        )
+    else:
+        print(
+            "[green]Configuration created:[/green] "
+            f"{result_path}"
+        )
+
+
+@config_app.command("show")
+def config_show(
+    path: str = typer.Argument(
+        "unobit.yaml",
+        help="Path to the configuration file.",
+    ),
+) -> None:
+    """Show the active UNOBIT configuration."""
+
+    try:
+        settings = load_settings(path)
+    except ConfigError as error:
+        print(f"[red]Configuration error:[/red] {error}")
+        raise typer.Exit(code=2) from error
+
+    print()
+    print("[bold]UNOBIT Configuration[/bold]")
+    print("------------------------------------")
+    print(f"File        : {Path(path)}")
+    print(f"Output      : {settings.output}")
+    print(f"Language    : {settings.language}")
+    print(f"JSON report : {settings.json_report}")
+    print(f"HTML report : {settings.html_report}")
+    print("------------------------------------")
+
+
+@report_app.command("show")
+def report_show(path: str) -> None:
+    """Display a JSON import report in the terminal."""
+
+    report_path = Path(path)
+
+    if not report_path.exists():
+        print(f"[red]Report not found:[/red] {report_path}")
+        raise typer.Exit(code=1)
+
+    try:
+        data = json.loads(
+            report_path.read_text(encoding="utf-8")
+        )
+    except json.JSONDecodeError as error:
+        print(
+            f"[red]Invalid JSON report:[/red] "
+            f"{report_path}"
+        )
+        raise typer.Exit(code=1) from error
+
+    print()
+    print("[bold]UNOBIT Report[/bold]")
+    print("------------------------------------")
+    print(f"Importer     : {data.get('importer', 'unknown')}")
+    print(f"Source       : {data.get('source', 'unknown')}")
+
+    print()
+    print("Notes")
+    print(f"  Imported   : {data.get('notes_total', 0)}")
+    print(f"  Exported   : {data.get('notes_success', 0)}")
+    print(f"  Failed     : {data.get('notes_failed', 0)}")
+
+    print()
+    print("Attachments")
+    print(
+        f"  Total      : "
+        f"{data.get('attachments_total', 0)}"
+    )
+    print(
+        f"  Exported   : "
+        f"{data.get('attachments_exported', 0)}"
+    )
+    print(
+        f"  Failed     : "
+        f"{data.get('attachments_failed', 0)}"
+    )
+
+    print()
+    print("Media")
+    print(f"  Total      : {data.get('media_total', 0)}")
+    print(f"  Resolved   : {data.get('media_resolved', 0)}")
+    print(
+        f"  Unresolved : "
+        f"{data.get('media_unresolved', 0)}"
+    )
+
+    print()
+    print(
+        f"Warnings     : "
+        f"{len(data.get('warnings', []))}"
+    )
+    print(
+        f"Errors       : "
+        f"{len(data.get('errors', []))}"
+    )
+    print("------------------------------------")
+
+
+@gui_app.command("start")
+def gui_start(
+    host: str = "127.0.0.1",
+    port: int = 8765,
+    no_browser: bool = False,
+) -> None:
+    """Start the local HTML/JavaScript GUI."""
+
+    start_gui(
+        host=host,
+        port=port,
+        open_browser=not no_browser,
+    )
+
+
 @app.command()
-def debug_evernote(path: str):
+def debug_evernote(path: str) -> None:
+    """Show basic debugging information for an ENEX file."""
+
     import_path = Path(path)
     importer = EvernoteImporter()
 
+    if not import_path.exists():
+        print(f"[red]Source file not found:[/red] {import_path}")
+        raise typer.Exit(code=1)
+
     items = importer.import_file(import_path)
 
-    print(f"[bold]Debug Evernote import[/bold]")
+    print("[bold]Debug Evernote import[/bold]")
     print(f"File: {import_path}")
     print(f"Items: {len(items)}")
     print()
 
     for item in items:
-        attachment_count = len(getattr(item, "attachments", []))
+        attachments = getattr(item, "attachments", [])
+        attachment_count = len(attachments)
+
         print(f"- {item.title}")
         print(f"  attachments: {attachment_count}")
 
-        for attachment in getattr(item, "attachments", []):
+        for attachment in attachments:
             print(f"    - filename: {attachment.filename}")
             print(f"      mime: {attachment.mime_type}")
             print(f"      checksum: {attachment.checksum}")
@@ -1768,6 +2215,66 @@ class TitleCleanupProcessor:
 
 ---
 
+## `src\unobit\reporters\html_report.py`
+
+```python
+from pathlib import Path
+
+from unobit.core.report import ImportReport
+
+
+class HtmlReportWriter:
+    def write(self, report: ImportReport, path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        html = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>UNOBIT Import Report</title>
+</head>
+<body>
+  <h1>UNOBIT Import Report</h1>
+
+  <h2>Summary</h2>
+  <ul>
+    <li>Importer: {report.importer}</li>
+    <li>Source: {report.source}</li>
+    <li>Notes imported: {report.notes_total}</li>
+    <li>Notes exported: {report.notes_success}</li>
+    <li>Warnings: {len(report.warnings)}</li>
+    <li>Errors: {len(report.errors)}</li>
+  </ul>
+
+  <h2>Attachments</h2>
+  <ul>
+    <li>Total: {report.attachments_total}</li>
+    <li>Exported: {report.attachments_exported}</li>
+    <li>Failed: {report.attachments_failed}</li>
+  </ul>
+
+  <h2>Media</h2>
+  <ul>
+    <li>Total: {report.media_total}</li>
+    <li>Resolved: {report.media_resolved}</li>
+    <li>Unresolved: {report.media_unresolved}</li>
+  </ul>
+
+  <h2>Performance</h2>
+  <ul>
+    <li>Notes/sec: {report.notes_per_second:.2f}</li>
+    <li>Attachments/sec: {report.attachments_per_second:.2f}</li>
+    <li>Peak memory MB: {report.peak_memory_mb}</li>
+  </ul>
+</body>
+</html>
+"""
+
+        path.write_text(html, encoding="utf-8")
+```
+
+---
+
 ## `src\unobit\reporters\json_report.py`
 
 ```python
@@ -1989,6 +2496,118 @@ class MediaLinkResolver:
             return f"[[{path}]]"
 
         return f"[{attachment.filename}]({path})"
+```
+
+---
+
+## `src\unobit\services\__init__.py`
+
+```python
+
+```
+
+---
+
+## `src\unobit\services\import_service.py`
+
+```python
+from pathlib import Path
+
+from unobit.core.context import PipelineContext
+from unobit.core.performance import MemoryMonitor
+from unobit.core.pipeline_factory import PipelineFactory
+from unobit.core.report import ImportReport
+from unobit.exporters import MarkdownExporter
+from unobit.importers.evernote import EvernoteImporter
+from unobit.reporters.html_report import HtmlReportWriter
+from unobit.reporters.json_report import JsonReportWriter
+
+
+def run_evernote_import(
+    path: str | Path,
+    output: str | Path = "output/evernote",
+    language: str = "en",
+    json_report: bool = True,
+    html_report: bool = False,
+) -> ImportReport:
+    """Import an Evernote ENEX archive and return its import report."""
+
+    import_path = Path(path)
+    output_path = Path(output)
+
+    importer = EvernoteImporter()
+
+    if not import_path.exists():
+        raise ValueError(f"Source file not found: {import_path}")
+
+    if not importer.supports_file(import_path):
+        raise ValueError(f"Unsupported file: {import_path}")
+
+    report = ImportReport(
+        source=str(import_path),
+        importer=importer.source_name,
+    )
+
+    monitor = MemoryMonitor()
+    monitor.start()
+
+    try:
+        context = PipelineContext(
+            source_path=import_path,
+            output_path=output_path,
+            importer_name=importer.source_name,
+            report=report,
+            options={
+                "language": language,
+                "json_report": json_report,
+                "html_report": html_report,
+            },
+        )
+
+        items = importer.import_file(import_path)
+        report.notes_total = len(items)
+
+        pipeline = PipelineFactory.create_default()
+        processed_items = pipeline.run(items, context)
+
+        exporter = MarkdownExporter(language=language)
+
+        created_files = exporter.export_items(
+            processed_items,
+            output_path,
+        )
+
+        report.notes_success = len(created_files)
+        report.notes_failed = (
+            report.notes_total - report.notes_success
+        )
+
+        report.attachments_total = sum(
+            len(getattr(item, "attachments", []))
+            for item in processed_items
+        )
+
+        report.attachments_exported = report.attachments_total
+
+        report.finish()
+        report.calculate_statistics()
+
+    finally:
+        report.peak_memory_mb = monitor.stop()
+
+    if json_report:
+        JsonReportWriter().write(
+            report,
+            output_path / "import-report.json",
+        )
+
+    if html_report:
+        HtmlReportWriter().write(
+            report,
+            output_path / "import-report.html",
+        )
+
+    return report
 ```
 
 ---

@@ -1,260 +1,164 @@
 # Universal Obsidian Import Toolkit (UNOBIT)
 
-Last updated: 2026-07-09
+Last updated: 2026-07-11
 
-Project status: Sprint 3 Completed
-Current version: v0.3.0-sprint3
-Next milestone: v0.4.0-beta
+**Current Version:** v0.4.0-dev
+
+**Current Milestone:** Sprint 4 Completed
+
+**Next Milestone:** Sprint 5 — Public Beta & User Experience
 
 ---
 
 # Vision
 
-UNOBIT is an open-source toolkit for importing knowledge from multiple platforms into Obsidian while preserving as much metadata, structure and attachments as possible.
+**Import once. Preserve forever.**
 
-Current focus:
+UNOBIT is an open-source toolkit that migrates knowledge from multiple platforms into Obsidian while preserving metadata, attachments, links and history.
+
+## Current production focus
+
 - Evernote
 
-Planned:
+## Planned
+
 - OneNote
 - Markdown
+- ChatGPT exports
 - Chrome Bookmarks
-- Future plugin architecture
+- Plugin architecture
 
 ---
 
 # Current Architecture
 
-Importer
-    ↓
-Validation
-    ↓
-Processing
-    ↓
-Resolution
-    ↓
-Exporter
+```text
+CLI / GUI
+      │
+      ▼
+ ImportService
+      │
+      ▼
+   Importer
+      │
+      ▼
+ Validation
+      │
+      ▼
+ Processing
+      │
+      ▼
+ Resolution
+      │
+      ▼
+  Exporter
+      │
+      ▼
+ Reports
+```
 
-Supporting components
+## Supporting Components
 
+- Configuration system
+- Processing Pipeline
 - ImportReport
-- Performance reporting
-- JSON report writer
+- JSON Report
+- HTML Report
+- Performance monitoring
 - ENML conversion framework
-- Test data generator
 
 ---
 
-# Implemented
+# Current Functionality
 
 ## Evernote
 
-✔ ENEX parsing
+- ✅ ENEX parsing
+- ✅ Attachments
+- ✅ Metadata
+- ✅ Markdown export
+- ✅ Internal links
+- ✅ ENML conversion
+- ✅ Todo conversion
+- ✅ Media resolution
+- ✅ YAML Frontmatter
 
-✔ Attachments
+## CLI
 
-✔ Markdown export
+- ✅ Nested command structure
+- ✅ Import commands
+- ✅ Configuration commands
+- ✅ Report commands
+- ✅ GUI launcher
 
-✔ Internal note links
+## GUI
 
-✔ ENML conversion
+- ✅ Local HTML prototype
+- ✅ JSON report viewer
 
-✔ Todo conversion
+## Reporting
 
-✔ Media placeholders
-
-✔ Attachment resolution
-
-✔ Performance metrics
-
-✔ JSON import report
+- ✅ JSON report
+- ✅ HTML report
+- ✅ Performance metrics
+- ✅ Pipeline timings
 
 ---
 
 # Testing
 
-Unit tests
+- ✅ Unit tests
+- ✅ Integration tests
+- ✅ CLI tests
+- ✅ ImportService tests
+- ✅ Regression tests
+- ✅ Large ENEX archives (>1 GB)
 
-Integration tests
-
-Regression ENEX files
-
-Generated test fixtures
-
-Large ENEX testing (>1GB)
-
-Current status
-
-All tests green
-
----
-
-# Repository Structure
-
-src/unobit
-
-core/
-
-enml/
-
-exporters/
-
-importers/
-
-processors/
-
-reporters/
-
-resolvers/
-
-validators/
-
-tests/
-
-tools/
-
-docs/
+**Current Status:** All tests green.
 
 ---
 
 # Technical Debt
 
-Notebook / Stack support
-
-Streaming importer
-
-Duplicate attachment detection
-
-Incremental import
-
-Filename conflict handling improvements
-
-Parallel processing
-
-HTML report
-
-GUI
-
-Configuration system
-
-Plugin API
+- Professional HTML report
+- GUI Import Wizard
+- GUI Report Viewer
+- Streaming importer
+- Notebook / Stack support
+- Duplicate attachment detection
+- Incremental import
+- Plugin API
 
 ---
 
 # Risks
 
-Very large ENEX files (>2 GB)
-
-Very large attachments
-
-Evernote HTML edge cases
-
-Unsupported ENML elements
+- Extremely large ENEX archives (>2 GB)
+- Unsupported ENML edge cases
+- Very large attachments
+- Platform-specific filesystem limitations
 
 ---
 
 # Coding Principles
 
-Small commits
-
-Test first
-
-Regression tests
-
-Pipeline based architecture
-
-Importer independent models
-
-Separation of concerns
+- Small commits
+- Test first
+- Regression testing
+- Pipeline architecture
+- Importer-independent models
+- Separation of concerns
+- Configuration over hardcoded behaviour
 
 ---
 
-# Sprint Summary
+# Definition of Done (Public Beta)
 
-Sprint 0
-
-Repository setup
-
-Sprint 1
-
-Evernote MVP
-
-Sprint 2
-
-Pipeline architecture
-
-Validation
-
-ImportReport
-
-Sprint 3
-
-Reference Resolution
-
-ENML framework
-
-Media resolution
-
-Performance metrics
-
-Regression framework
-
-Status: Complete
-
----
-
-# Sprint 4 Goals
-
-CLI redesign
-
-Configuration (unobit.yaml)
-
-HTML/JavaScript GUI
-
-HTML report
-
-Public beta packaging
-
-Documentation polish
-
----
-
-# Definition of Done (Beta)
-
-CLI stable
-
-Configuration file
-
-GUI prototype
-
-Performance report
-
-JSON report
-
-Documentation complete
-
-Regression suite green
-
-Large ENEX validated
-
-GitHub release
-
-PyPI-ready packaging
-
----
-
-# Nice-to-have after Beta
-
-OneNote importer
-
-Markdown importer
-
-Chrome Bookmarks importer
-
-Plugin API
-
-Streaming pipeline
-
-Duplicate detection
-
-Incremental synchronization
+- Stable CLI
+- Stable configuration
+- HTML reports
+- Functional GUI
+- Documentation complete
+- All tests green
+- Large ENEX validated
+- GitHub beta release
