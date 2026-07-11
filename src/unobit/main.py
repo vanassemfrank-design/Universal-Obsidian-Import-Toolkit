@@ -1,30 +1,40 @@
-from unobit.core.context import PipelineContext
-from unobit.core.pipeline_factory import PipelineFactory
-from unobit.core.report import ImportReport
+import json
 from pathlib import Path
-from unobit.importers import DummyImporter, EvernoteImporter
-from unobit.exporters import MarkdownExporter
-from unobit.services.import_service import run_evernote_import
 
 import typer
-import json
 from rich import print
 
-from unobit.gui.server import start_gui
-
 from unobit import __version__
+from unobit.config.settings import (
+    load_settings,
+    write_default_settings,
+)
+from unobit.exporters import MarkdownExporter
+from unobit.gui.server import start_gui
+from unobit.importers import DummyImporter, EvernoteImporter
 from unobit.models import Bookmark, Note
-
-from unobit.core.performance import MemoryMonitor
-from unobit.reporters.json_report import JsonReportWriter
-from unobit.config.settings import load_settings, write_default_settings
+from unobit.services.import_service import run_evernote_import
 
 
-app = typer.Typer(help="Universal Obsidian Import Toolkit")
-import_app = typer.Typer(help="Import commands")
-config_app = typer.Typer(help="Configuration commands")
-report_app = typer.Typer(help="Report commands")
-gui_app = typer.Typer(help="GUI commands")
+app = typer.Typer(
+    help="Universal Obsidian Import Toolkit",
+)
+
+import_app = typer.Typer(
+    help="Import knowledge archives.",
+)
+
+config_app = typer.Typer(
+    help="Manage UNOBIT configuration.",
+)
+
+report_app = typer.Typer(
+    help="View UNOBIT import reports.",
+)
+
+gui_app = typer.Typer(
+    help="Start the local UNOBIT GUI.",
+)
 
 app.add_typer(import_app, name="import")
 app.add_typer(config_app, name="config")
@@ -33,7 +43,9 @@ app.add_typer(gui_app, name="gui")
 
 
 @app.command()
-def info():
+def info() -> None:
+    """Show information about UNOBIT."""
+
     print()
     print("[bold]Universal Obsidian Import Toolkit[/bold]")
     print("UNOBIT")
@@ -42,12 +54,16 @@ def info():
 
 
 @app.command()
-def version():
+def version() -> None:
+    """Show the installed UNOBIT version."""
+
     print(__version__)
 
 
 @app.command()
-def demo():
+def demo() -> None:
+    """Show example universal knowledge objects."""
+
     note = Note(
         title="Example Evernote Note",
         source="evernote",
@@ -70,8 +86,13 @@ def demo():
     print()
     print(bookmark)
 
+
 @app.command()
-def import_dummy(path: str = "samples/dummy/example.dummy"):
+def import_dummy(
+    path: str = "samples/dummy/example.dummy",
+) -> None:
+    """Import a dummy test file."""
+
     importer = DummyImporter()
     import_path = Path(path)
 
@@ -81,20 +102,31 @@ def import_dummy(path: str = "samples/dummy/example.dummy"):
 
     items = importer.import_file(import_path)
 
-    print(f"[bold]Imported {len(items)} items from {import_path}[/bold]")
+    print(
+        f"[bold]Imported {len(items)} items "
+        f"from {import_path}[/bold]"
+    )
     print()
 
     for item in items:
         print(item)
         print()
 
+
 @app.command()
-def export_demo(output: str = "output/demo"):
+def export_demo(
+    output: str = "output/demo",
+) -> None:
+    """Export example objects to Markdown."""
+
     note = Note(
         title="Example Evernote Note",
         source="evernote",
         notebook="Inbox",
-        body="This is a universal note object exported to Markdown.",
+        body=(
+            "This is a universal note object "
+            "exported to Markdown."
+        ),
         tags=["example", "evernote"],
     )
 
@@ -107,50 +139,83 @@ def export_demo(output: str = "output/demo"):
     )
 
     exporter = MarkdownExporter()
-    created_files = exporter.export_items([note, bookmark], Path(output))
 
-    print(f"[bold]Exported {len(created_files)} files to {output}[/bold]")
+    created_files = exporter.export_items(
+        [note, bookmark],
+        Path(output),
+    )
+
+    print(
+        f"[bold]Exported {len(created_files)} "
+        f"files to {output}[/bold]"
+    )
     print()
 
     for file_path in created_files:
         print(file_path)
 
+
 @import_app.command("evernote")
 def import_evernote(
     path: str,
-    output: str | None = None,
-    config: str = "unobit.yaml",
-):
+    output: str | None = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Override the configured output directory.",
+    ),
+    config: str = typer.Option(
+        "unobit.yaml",
+        "--config",
+        "-c",
+        help="Path to the UNOBIT configuration file.",
+    ),
+) -> None:
+    """Import an Evernote ENEX archive."""
+
+    settings = load_settings(config)
+    resolved_output = output or settings.output
+    output_path = Path(resolved_output)
+
     try:
-        settings = load_settings(config)
-        resolved_output = output or settings.output
-        report = run_evernote_import(path, resolved_output)
+        report = run_evernote_import(
+            path=path,
+            output=resolved_output,
+            language=settings.language,
+            json_report=settings.json_report,
+            html_report=settings.html_report,
+        )
     except ValueError as error:
         print(f"[red]{error}[/red]")
-        raise typer.Exit(code=1)
-    
-    output_path = Path(resolved_output)
+        raise typer.Exit(code=1) from error
+    except Exception as error:
+        print(f"[red]Import failed:[/red] {error}")
+        raise typer.Exit(code=1) from error
 
     print()
     print("[bold]UNOBIT Import Summary[/bold]")
     print("------------------------------------")
     print(f"Importer     : {report.importer}")
     print(f"Source       : {report.source}")
+
     print()
     print("Notes")
     print(f"  Imported   : {report.notes_total}")
     print(f"  Exported   : {report.notes_success}")
     print(f"  Failed     : {report.notes_failed}")
+
     print()
     print("Attachments")
     print(f"  Total      : {report.attachments_total}")
     print(f"  Exported   : {report.attachments_exported}")
     print(f"  Failed     : {report.attachments_failed}")
+
     print()
     print("Media")
     print(f"  Total      : {report.media_total}")
     print(f"  Resolved   : {report.media_resolved}")
     print(f"  Unresolved : {report.media_unresolved}")
+
     print()
     print(f"Warnings     : {len(report.warnings)}")
     print(f"Errors       : {len(report.errors)}")
@@ -158,113 +223,208 @@ def import_evernote(
     if report.timings:
         print()
         print("Timings")
+
         for name, seconds in report.timings.items():
-            print(f"  {name:<12}: {report.format_duration(seconds)}")
+            print(
+                f"  {name:<12}: "
+                f"{report.format_duration(seconds)}"
+            )
 
     if report.duration_seconds is not None:
         print()
-        print(f"Total time   : {report.format_duration(report.duration_seconds)}")
+        print(
+            "Total time   : "
+            f"{report.format_duration(report.duration_seconds)}"
+        )
 
     print()
     print("Performance")
-    print(f"  Notes/sec       : {report.notes_per_second:.2f}")
-    print(f"  Attachments/sec : {report.attachments_per_second:.2f}")
+    print(
+        f"  Notes/sec       : "
+        f"{report.notes_per_second:.2f}"
+    )
+    print(
+        f"  Attachments/sec : "
+        f"{report.attachments_per_second:.2f}"
+    )
 
     if report.peak_memory_mb is not None:
-        print(f"  Peak memory     : {report.peak_memory_mb:.2f} MB")
+        print(
+            f"  Peak memory     : "
+            f"{report.peak_memory_mb:.2f} MB"
+        )
 
     print()
     print(f"Output       : {output_path}")
-    print(f"Report       : {output_path / 'import-report.json'}")
+
+    if settings.json_report:
+        print(
+            f"JSON report  : "
+            f"{output_path / 'import-report.json'}"
+        )
+
+    if settings.html_report:
+        print(
+            f"HTML report  : "
+            f"{output_path / 'import-report.html'}"
+        )
+
     print("------------------------------------")
 
 
-
-@app.command()
-def debug_evernote(path: str):
-    import_path = Path(path)
-    importer = EvernoteImporter()
-
-    items = importer.import_file(import_path)
-
-    print(f"[bold]Debug Evernote import[/bold]")
-    print(f"File: {import_path}")
-    print(f"Items: {len(items)}")
-    print()
-
-    for item in items:
-        attachment_count = len(getattr(item, "attachments", []))
-        print(f"- {item.title}")
-        print(f"  attachments: {attachment_count}")
-
-        for attachment in getattr(item, "attachments", []):
-            print(f"    - filename: {attachment.filename}")
-            print(f"      mime: {attachment.mime_type}")
-            print(f"      checksum: {attachment.checksum}")
-            print(f"      size: {attachment.size_bytes}")
-
 @config_app.command("init")
-def config_init(path: str = "unobit.yaml"):
-    created_path = write_default_settings(path)
-    print(f"[green]Configuration ready:[/green] {created_path}")
+def config_init(
+    path: str = "unobit.yaml",
+) -> None:
+    """Create a default UNOBIT configuration file."""
+
+    config_path = Path(path)
+    existed = config_path.exists()
+
+    result_path = write_default_settings(config_path)
+
+    if existed:
+        print(
+            "[yellow]Configuration already exists:[/yellow] "
+            f"{result_path}"
+        )
+    else:
+        print(
+            "[green]Configuration created:[/green] "
+            f"{result_path}"
+        )
 
 
 @config_app.command("show")
-def config_show(path: str = "unobit.yaml"):
+def config_show(
+    path: str = "unobit.yaml",
+) -> None:
+    """Show the active UNOBIT configuration."""
+
     settings = load_settings(path)
 
+    print()
     print("[bold]UNOBIT Configuration[/bold]")
-    output_path = Path(resolved_output)
+    print("------------------------------------")
+    print(f"File        : {Path(path)}")
+    print(f"Output      : {settings.output}")
+    print(f"Language    : {settings.language}")
+    print(f"JSON report : {settings.json_report}")
+    print(f"HTML report : {settings.html_report}")
+    print("------------------------------------")
 
-    print(f"Output       : {output_path}")
-    print(f"Report       : {output_path / 'import-report.json'}")
-    print(f"language    : {settings.language}")
-    print(f"json_report : {settings.json_report}")
-    print(f"html_report : {settings.html_report}")
 
 @report_app.command("show")
-def report_show(path: str):
+def report_show(path: str) -> None:
+    """Display a JSON import report in the terminal."""
+
     report_path = Path(path)
 
     if not report_path.exists():
         print(f"[red]Report not found:[/red] {report_path}")
         raise typer.Exit(code=1)
 
-    data = json.loads(report_path.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(
+            report_path.read_text(encoding="utf-8")
+        )
+    except json.JSONDecodeError as error:
+        print(
+            f"[red]Invalid JSON report:[/red] "
+            f"{report_path}"
+        )
+        raise typer.Exit(code=1) from error
 
     print()
     print("[bold]UNOBIT Report[/bold]")
     print("------------------------------------")
-    print(f"Importer     : {data.get('importer')}")
-    print(f"Source       : {data.get('source')}")
+    print(f"Importer     : {data.get('importer', 'unknown')}")
+    print(f"Source       : {data.get('source', 'unknown')}")
+
     print()
     print("Notes")
-    print(f"  Imported   : {data.get('notes_total')}")
-    print(f"  Exported   : {data.get('notes_success')}")
-    print(f"  Failed     : {data.get('notes_failed')}")
+    print(f"  Imported   : {data.get('notes_total', 0)}")
+    print(f"  Exported   : {data.get('notes_success', 0)}")
+    print(f"  Failed     : {data.get('notes_failed', 0)}")
+
     print()
     print("Attachments")
-    print(f"  Total      : {data.get('attachments_total')}")
-    print(f"  Exported   : {data.get('attachments_exported')}")
-    print(f"  Failed     : {data.get('attachments_failed')}")
+    print(
+        f"  Total      : "
+        f"{data.get('attachments_total', 0)}"
+    )
+    print(
+        f"  Exported   : "
+        f"{data.get('attachments_exported', 0)}"
+    )
+    print(
+        f"  Failed     : "
+        f"{data.get('attachments_failed', 0)}"
+    )
+
     print()
     print("Media")
-    print(f"  Total      : {data.get('media_total')}")
-    print(f"  Resolved   : {data.get('media_resolved')}")
-    print(f"  Unresolved : {data.get('media_unresolved')}")
+    print(f"  Total      : {data.get('media_total', 0)}")
+    print(f"  Resolved   : {data.get('media_resolved', 0)}")
+    print(
+        f"  Unresolved : "
+        f"{data.get('media_unresolved', 0)}"
+    )
+
     print()
-    print(f"Warnings     : {len(data.get('warnings', []))}")
-    print(f"Errors       : {len(data.get('errors', []))}")
+    print(
+        f"Warnings     : "
+        f"{len(data.get('warnings', []))}"
+    )
+    print(
+        f"Errors       : "
+        f"{len(data.get('errors', []))}"
+    )
     print("------------------------------------")
+
 
 @gui_app.command("start")
 def gui_start(
     host: str = "127.0.0.1",
     port: int = 8765,
     no_browser: bool = False,
-):
+) -> None:
+    """Start the local HTML/JavaScript GUI."""
+
     start_gui(
         host=host,
         port=port,
         open_browser=not no_browser,
     )
+
+
+@app.command()
+def debug_evernote(path: str) -> None:
+    """Show basic debugging information for an ENEX file."""
+
+    import_path = Path(path)
+    importer = EvernoteImporter()
+
+    if not import_path.exists():
+        print(f"[red]Source file not found:[/red] {import_path}")
+        raise typer.Exit(code=1)
+
+    items = importer.import_file(import_path)
+
+    print("[bold]Debug Evernote import[/bold]")
+    print(f"File: {import_path}")
+    print(f"Items: {len(items)}")
+    print()
+
+    for item in items:
+        attachments = getattr(item, "attachments", [])
+        attachment_count = len(attachments)
+
+        print(f"- {item.title}")
+        print(f"  attachments: {attachment_count}")
+
+        for attachment in attachments:
+            print(f"    - filename: {attachment.filename}")
+            print(f"      mime: {attachment.mime_type}")
+            print(f"      checksum: {attachment.checksum}")
+            print(f"      size: {attachment.size_bytes}")
