@@ -6,6 +6,7 @@ from rich import print
 
 from unobit import __version__
 from unobit.config.settings import (
+    ConfigError,
     load_settings,
     write_default_settings,
 )
@@ -173,7 +174,11 @@ def import_evernote(
 ) -> None:
     """Import an Evernote ENEX archive."""
 
-    settings = load_settings(config)
+    try:
+        settings = load_settings(config)
+    except ConfigError as error:
+        print(f"[red]Configuration error:[/red] {error}")
+        raise typer.Exit(code=2) from error
     resolved_output = output or settings.output
     output_path = Path(resolved_output)
 
@@ -274,7 +279,10 @@ def import_evernote(
 
 @config_app.command("init")
 def config_init(
-    path: str = "unobit.yaml",
+    path: str = typer.Argument(
+        "unobit.yaml",
+        help="Path for the configuration file.",
+    ),
 ) -> None:
     """Create a default UNOBIT configuration file."""
 
@@ -297,11 +305,18 @@ def config_init(
 
 @config_app.command("show")
 def config_show(
-    path: str = "unobit.yaml",
+    path: str = typer.Argument(
+        "unobit.yaml",
+        help="Path to the configuration file.",
+    ),
 ) -> None:
     """Show the active UNOBIT configuration."""
 
-    settings = load_settings(path)
+    try:
+        settings = load_settings(path)
+    except ConfigError as error:
+        print(f"[red]Configuration error:[/red] {error}")
+        raise typer.Exit(code=2) from error
 
     print()
     print("[bold]UNOBIT Configuration[/bold]")
